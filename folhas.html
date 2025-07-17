@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Folhas de Assinatura</title>
+  <link rel="stylesheet" href="css/vars.css">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Quicksand:wght@400;600&display=swap" rel="stylesheet">
+</head>
+<body class="layout">
+  <aside class="sidebar">
+    <h2>Menu</h2>
+    <nav>
+      <ul>
+        <li><a href="index.html">Início</a></li>
+        <li><a href="folhas.html">Folhas de Assinatura</a></li>
+        <li><a href="encomendas.html">Registro de Encomendas</a></li>
+      </ul>
+    </nav>
+  </aside>
+  <main class="main-content">
+    <h1>Folha de Assinaturas</h1>
+    <div class="folha-container">
+      <textarea id="entrada" placeholder="Cole aqui os dados copiados do sistema"></textarea>
+      <div class="controls">
+        <select id="torre">
+          <option value="ADMINISTRACAO" selected>Administração</option>
+          <option value="TORRE A">Torre A</option>
+          <option value="TORRE B">Torre B</option>
+          <option value="TORRE C">Torre C</option>
+          <option value="TORRE D">Torre D</option>
+          <option value="TORRE E">Torre E</option>
+        </select>
+        <button onclick="gerarTabela()">Gerar para Impressão</button>
+      </div>
+    </div>
+  </main>
+  <script src="js/folhas.js"></script>
+</body>
+</html>

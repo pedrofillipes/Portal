@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Portal do Condomínio</title>
+  <link rel="stylesheet" href="css/vars.css">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="layout">
+  <button class="menu-toggle" id="menuToggle">☰</button>
+  
+  <aside class="sidebar" id="sidebar">
+    <h2>Portal do Condomínio</h2>
+    <nav>
+      <ul>
+        <li><a href="index.html" class="active">🏠 Início</a></li>
+        <li><a href="folhas.html">📋 Folhas de Assinatura</a></li>
+        <li><a href="encomendas.html">📦 Registro de Encomendas</a></li>
+      </ul>
+    </nav>
+  </aside>
+  
+  <main class="main-content">
+    <div class="fade-in">
+      <h1>Bem-vindo ao Portal</h1>
+      <p class="text-muted mb-xl">Gerencie as atividades do condomínio de forma eficiente e organizada.</p>
+      
+      <div class="grid">
+        <div class="card">
+          <h2>📋 Folhas de Assinatura</h2>
+          <p class="text-muted mb-lg">Gere folhas de assinatura organizadas por torre para controle de entregas e correspondências.</p>
+          <div class="flex gap-md">
+            <a href="folhas.html" class="btn btn-primary">Acessar</a>
+          </div>
+        </div>
+        
+        <div class="card">
+          <h2>📦 Registro de Encomendas</h2>
+          <p class="text-muted mb-lg">Registre e acompanhe encomendas dos moradores com sistema de busca e controle de baixa.</p>
+          <div class="flex gap-md">
+            <a href="encomendas.html" class="btn btn-secondary">Acessar</a>
+          </div>
+        </div>
+      </div>
+      
+      <div class="card mt-xl">
+        <h2>ℹ️ Sobre o Sistema</h2>
+        <p class="text-muted">Este portal foi desenvolvido para facilitar a gestão administrativa do condomínio, oferecendo ferramentas para:</p>
+        <ul class="text-muted">
+          <li>Organização de folhas de assinatura por torres</li>
+          <li>Controle de encomendas e correspondências</li>
+          <li>Busca avançada de registros</li>
+          <li>Sistema de baixa automática</li>
+        </ul>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    // Menu toggle para mobile
+    const menuToggle = document.getElementById('menuToggle');
+    const sidebar = document.getElementById('sidebar');
+    
+    menuToggle.addEventListener('click', () => {
+      sidebar.classList.toggle('active');
+    });
+    
+    // Fechar sidebar ao clicar fora (mobile)
+    document.addEventListener('click', (e) => {
+      if (window.innerWidth <= 768 && 
+          !sidebar.contains(e.target) && 
+          !menuToggle.contains(e.target)) {
+        sidebar.classList.remove('active');
+      }
+    });
+    
+    // Responsividade
+    window.addEventListener('resize', () => {
+      if (window.innerWidth > 768) {
+        sidebar.classList.remove('active');
+      }
+    });
+  </script>
+  
+  <style>
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: var(--space-xl);
+      margin-top: var(--space-xl);
+    }
+    
+    .card h2 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin: 0 0 var(--space-md) 0;
+      color: var(--color-text-primary);
+    }
+    
+    .card p {
+      margin: 0 0 var(--space-lg) 0;
+      line-height: 1.6;
+    }
+    
+    .card ul {
+      margin: var(--space-md) 0;
+      padding-left: var(--space-xl);
+    }
+    
+    .card ul li {
+      margin-bottom: var(--space-sm);
+    }
+    
+    .mt-xl {
+      margin-top: var(--space-xl);
+    }
+    
+    @media (max-width: 768px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</body>
+</html>
