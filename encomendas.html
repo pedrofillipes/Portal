@@ -6,182 +6,868 @@
   <title>Registro de Encomendas</title>
   <link rel="stylesheet" href="css/vars.css">
   <link rel="stylesheet" href="css/style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
-    .modal-overlay {
-      position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      background: rgba(0,0,0,0.4);
-      display: none;
-      justify-content: center;
-      align-items: center;
-      z-index: 999;
-    }
-    .modal-content {
-      background: white;
-      padding: 1rem;
-      border-radius: 12px;
-      max-width: 860px;
-      width: 95%;
-      height: 90%;
-      display: flex;
-      flex-direction: column;
-      box-shadow: 0 0 20px rgba(0,0,0,0.2);
-    }
-    .modal-header {
+    /* Estilos específicos para encomendas.html */
+
+    .header-actions {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      font-family: var(--font-2);
-      border-bottom: 1px solid #ccc;
-      padding-bottom: 0.5rem;
-      margin-bottom: 0.5rem;
+      margin-bottom: var(--space-xl);
+      flex-wrap: wrap;
+      gap: var(--space-md);
     }
-    .modal-header h2 {
-      font-size: 1.2rem;
+
+    .header-actions h1 {
       margin: 0;
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: var(--color-text-primary);
+      font-family: var(--font-secondary);
     }
-    .modal-header button {
-      background: var(--cor-3);
-      color: white;
-      border: none;
-      padding: 6px 12px;
-      border-radius: 6px;
-      cursor: pointer;
+
+    .search-section {
+      background: var(--color-surface);
+      border-radius: var(--border-radius-lg);
+      padding: var(--space-xl);
+      margin-bottom: var(--space-xl);
+      box-shadow: var(--shadow-sm);
+      border: 1px solid var(--border-color);
     }
-    .modal-header button:hover {
-      background: var(--cor-4);
-    }
-    .modal-content form {
-      display: flex;
-      flex-direction: column;
-      gap: 1rem;
-      flex: 1;
-    }
-    .modal-content form label {
-      display: flex;
-      flex-direction: column;
+
+    .search-section h2 {
+      margin: 0 0 var(--space-lg) 0;
+      font-size: 1.25rem;
       font-weight: 600;
+      color: var(--color-text-primary);
     }
-    .modal-content form input, .modal-content form textarea {
-      padding: 0.5rem;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-      font-family: var(--font);
+
+    .search-controls {
+      display: grid;
+      grid-template-columns: 200px 1fr auto; /* Ajustado para melhor controle dos elementos de busca */
+      gap: var(--space-md);
+      align-items: end; /* Alinha os itens à base */
     }
-    .modal-content form button[type="submit"] {
-      background: var(--cor-3);
-      color: white;
-      font-weight: bold;
+
+    .search-controls select,
+    .search-controls input {
+      padding: var(--space-md);
+      border: 1px solid var(--border-color);
+      border-radius: var(--border-radius);
+      font-size: 1rem;
+      font-family: var(--font-primary);
+      transition: all var(--transition-fast);
+      background: var(--color-background); /* Usar background do body */
+      color: var(--color-text-primary);
+    }
+
+    .search-controls select:focus,
+    .search-controls input:focus {
+      outline: none;
+      border-color: var(--color-primary);
+      box-shadow: 0 0 0 3px var(--color-primary-bg);
+    }
+
+    .search-controls input::placeholder {
+      color: var(--color-text-muted);
+    }
+
+    .results-section {
+      background: var(--color-surface);
+      border-radius: var(--border-radius-lg);
+      overflow: hidden; /* Garante que a tabela não vaze */
+      box-shadow: var(--shadow-sm);
+      border: 1px solid var(--border-color);
+      min-height: 200px; /* Altura mínima para a seção de resultados */
+      display: flex; /* Para centralizar o conteúdo de vazio/carregando */
+      flex-direction: column; /* Conteúdo em coluna */
+    }
+
+    .results-header {
+      background: var(--color-primary-bg);
+      padding: var(--space-lg);
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .results-header h3 {
+      margin: 0;
+      font-size: 1.125rem;
+      font-weight: 600;
+      color: var(--color-text-primary);
+    }
+
+    .results-content {
+      flex-grow: 1; /* Permite que o conteúdo cresça e ocupe o espaço */
+      padding: var(--space-lg);
+      min-height: 300px; /* Altura mínima para o conteúdo */
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow-x: auto; /* Adiciona scroll horizontal para tabelas grandes */
+    }
+
+    .results-content.loading,
+    .results-content.empty {
+      color: var(--color-text-muted);
+      font-style: italic;
+      text-align: center;
+      flex-direction: column;
+      gap: var(--space-md);
+    }
+
+    .results-content table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.875rem;
+      min-width: 600px; /* Garante que a tabela tenha uma largura mínima para rolagem */
+    }
+
+    .results-content th {
+      background: var(--color-background); /* Fundo dos cabeçalhos da tabela */
+      color: var(--color-text-primary);
+      padding: var(--space-md);
+      text-align: left;
+      font-weight: 600;
+      border-bottom: 2px solid var(--border-color);
+      position: sticky; /* Fixa o cabeçalho ao rolar a tabela */
+      top: 0;
+      z-index: 10;
+    }
+
+    .results-content td {
+      padding: var(--space-md);
+      border-bottom: 1px solid var(--border-color);
+      color: var(--color-text-secondary);
+      vertical-align: middle;
+    }
+
+    .results-content tr:hover {
+      background: var(--color-surface-hover);
+    }
+
+    .results-content tr:last-child td {
+      border-bottom: none;
+    }
+
+    .status-badge {
+      padding: var(--space-xs) var(--space-sm);
+      border-radius: var(--border-radius);
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* Cores dos badges de status - usar as variáveis do vars.css */
+    .status-badge.cadastrado { /* Renomeado de 'ativo' para 'cadastrado' conforme o CSV */
+      background: var(--color-info); /* Cor de informação, azul */
+      color: var(--color-text-inverse);
+    }
+
+    .status-badge.entregue {
+      background: var(--color-secondary); /* Cor de sucesso, verde */
+      color: var(--color-text-inverse);
+    }
+
+    .status-badge.pendente { /* Se houver um status "pendente" */
+      background: var(--color-warning); /* Cor de aviso, laranja */
+      color: var(--color-text-inverse);
+    }
+
+    .btn-action {
+      /* Estilos para o botão de ação dentro da tabela */
+      padding: var(--space-sm) var(--space-md);
+      font-size: 0.875rem;
+      border-radius: var(--border-radius);
       border: none;
-      padding: 0.75rem;
-      border-radius: 6px;
       cursor: pointer;
+      transition: all var(--transition-fast);
+      font-weight: 500;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-xs);
     }
-    .modal-content form button[type="submit"]:hover {
-      background: var(--cor-4);
+
+    .btn-action.btn-baixa {
+      background: var(--color-primary);
+      color: var(--color-text-inverse);
+    }
+
+    .btn-action.btn-baixa:hover {
+      background: var(--color-primary-dark);
+      transform: translateY(-1px);
+    }
+
+    .btn-action.btn-baixa:disabled {
+      background: var(--color-text-muted);
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+      opacity: 0.7;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: var(--space-2xl);
+    }
+
+    .empty-state .icon {
+      font-size: 3rem;
+      margin-bottom: var(--space-md);
+      opacity: 0.5;
+    }
+
+    .empty-state h3 {
+      margin: 0 0 var(--space-md) 0;
+      color: var(--color-text-secondary);
+    }
+
+    .empty-state p {
+      margin: 0;
+      color: var(--color-text-muted);
+    }
+
+    .loading-spinner {
+      border: 3px solid var(--color-primary-bg);
+      border-top: 3px solid var(--color-primary);
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto var(--space-md);
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .error-message {
+      background: var(--color-error); /* Usar a cor de erro */
+      color: var(--color-text-inverse);
+      padding: var(--space-lg);
+      border-radius: var(--border-radius);
+      border: 1px solid var(--color-error);
+      margin: var(--space-md) 0;
+    }
+
+    .success-message {
+      background: var(--color-secondary-bg); /* Usar o background de sucesso */
+      color: var(--color-secondary-dark); /* Usar a cor de texto de sucesso */
+      padding: var(--space-lg);
+      border-radius: var(--border-radius);
+      border: 1px solid var(--color-secondary-light);
+      margin: var(--space-md) 0;
+    }
+
+    /* Modal melhorado - já presente no style.css, apenas ajustes finos ou sobreescritas */
+    .modal-overlay {
+      animation: fadeIn 0.3s ease-out; /* Já presente, apenas garantindo */
+    }
+
+    .modal-content {
+      animation: slideIn 0.3s ease-out; /* Já presente, apenas garantindo */
+    }
+
+    .modal-header {
+      background: var(--color-primary-bg); /* Fundo do cabeçalho do modal */
+      border-radius: var(--border-radius-xl) var(--border-radius-xl) 0 0; /* Bordas arredondadas no topo */
+      padding: var(--space-xl); /* Ajuste de padding */
+      border-bottom: 1px solid var(--border-color); /* Separador */
+    }
+
+    .modal-header h2 {
+      margin: 0;
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: var(--color-text-primary);
+    }
+
+    .modal-body {
+      padding: var(--space-xl);
+    }
+
+    .modal-form {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-lg);
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-md);
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .form-group label {
+      margin-bottom: var(--space-sm);
+      font-weight: 600;
+      color: var(--color-text-primary);
+    }
+
+    .form-group input,
+    .form-group textarea {
+      padding: var(--space-md);
+      border: 1px solid var(--border-color);
+      border-radius: var(--border-radius);
+      font-size: 1rem;
+      font-family: var(--font-primary);
+      transition: all var(--transition-fast);
+      background: var(--color-background); /* Usar background do body */
+      color: var(--color-text-primary);
+    }
+
+    .form-group input:focus,
+    .form-group textarea:focus {
+      outline: none;
+      border-color: var(--color-primary);
+      box-shadow: 0 0 0 3px var(--color-primary-bg);
+    }
+
+    .form-group textarea {
+      resize: vertical;
+      min-height: 80px;
+    }
+
+    .form-actions {
+      display: flex;
+      gap: var(--space-md);
+      justify-content: flex-end;
+      padding-top: var(--space-lg);
+      border-top: 1px solid var(--border-color);
+    }
+
+    /* Responsividade - já presente, apenas garantindo */
+    @media (max-width: 768px) {
+      .header-actions {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .header-actions h1 {
+        font-size: 2rem;
+        text-align: center;
+      }
+
+      .search-controls {
+        grid-template-columns: 1fr;
+        gap: var(--space-md);
+      }
+
+      .form-row {
+        grid-template-columns: 1fr;
+      }
+
+      .form-actions {
+        flex-direction: column;
+      }
+
+      .results-content {
+        overflow-x: auto;
+      }
+
+      .results-content table {
+        min-width: 600px;
+      }
     }
   </style>
 </head>
 <body class="layout">
-  <aside class="sidebar">
-    <h2>Menu</h2>
+  <button class="menu-toggle" id="menuToggle">☰</button>
+  
+  <aside class="sidebar" id="sidebar">
+    <h2>Portal do Condomínio</h2>
     <nav>
       <ul>
-        <li><a href="index.html">Início</a></li>
-        <li><a href="folhas.html">Folhas de Assinatura</a></li>
-        <li><a href="encomendas.html">Registro de Encomendas</a></li>
+        <li><a href="index.html">🏠 Início</a></li>
+        <li><a href="folhas.html">📋 Folhas de Assinatura</a></li>
+        <li><a href="encomendas.html" class="active">📦 Registro de Encomendas</a></li>
       </ul>
     </nav>
   </aside>
-  <main class="main-content">
-    <div style="display: flex; justify-content: space-between; align-items: center;">
+
+  <main class="main-content fade-in">
+    <div class="header-actions">
       <h1>Registro de Encomendas</h1>
-      <button id="btnNovaEncomenda">Nova Encomenda</button>
+      <button class="btn btn-primary" id="btnNovaEncomenda">
+        ➕ Nova Encomenda
+      </button>
     </div>
 
-    <div class="filtros">
-      <label for="filtro">Filtrar por:</label>
-      <select id="filtro">
-        <option value="">--Selecione--</option>
-        <option value="identificador">Identificador</option>
-        <option value="destinatario">Destinatário</option>
-        <option value="unidade">Unidade</option>
-      </select>
-      <div id="filtros-dinamicos"></div>
+    <div class="search-section card"> <h2>🔍 Buscar Encomendas</h2>
+      <div class="search-controls">
+        <div class="form-group">
+          <label for="filtroTipo">Buscar por:</label>
+          <select id="filtroTipo" class="form-control"> <option value="">Selecione o tipo</option>
+            <option value="identificador">Identificador</option>
+            <option value="destinatario">Destinatário</option>
+            <option value="unidade">Unidade</option>
+          </select>
+        </div>
+        
+        <div class="form-group">
+          <label for="campoBusca">Termo de busca:</label>
+          <input type="text" id="campoBusca" placeholder="Digite para buscar..." disabled class="form-control">
+        </div>
+        
+        <div class="form-group">
+          <label for="btnBuscar" style="visibility: hidden;">Ação</label> 
+          <button class="btn btn-secondary" id="btnBuscar" disabled>
+            🔍 Buscar
+          </button>
+        </div>
+      </div>
     </div>
-    <div id="resultados" class="resultados-container"></div>
+
+    <div class="results-section table-container"> <div class="results-header">
+        <h3>📋 Resultados da Busca</h3>
+      </div>
+      <div class="results-content empty" id="resultados">
+        <div class="empty-state">
+          <div class="icon">📦</div>
+          <h3>Nenhuma busca realizada</h3>
+          <p>Selecione um tipo de filtro e digite um termo para buscar encomendas.</p>
+        </div>
+      </div>
+    </div>
   </main>
 
-  <!-- Modal de Nova Encomenda -->
   <div class="modal-overlay" id="modalForm">
     <div class="modal-content">
       <div class="modal-header">
-        <h2>Nova Encomenda</h2>
-        <button id="btnFecharModal">Fechar</button>
+        <h2>📦 Nova Encomenda</h2>
+        <button class="btn btn-outline btn-sm" id="btnFecharModal">✕ Fechar</button>
       </div>
-      <form id="formEncomenda">
-        <label>Remetente:
-          <input type="text" name="remetente" required />
-        </label>
-        <label>Destinatário:
-          <input type="text" name="destinatario" required />
-        </label>
-        <label>Tipo:
-          <input type="text" name="tipo" required />
-        </label>
-        <label>Identificador:
-          <input type="text" name="identificador" required />
-        </label>
-        <label>Observação:
-          <textarea name="observacao" rows="3"></textarea>
-        </label>
-        <input type="hidden" name="carimbo" id="dataCadastro" />
-        <button type="submit">Enviar</button>
-      </form>
-      <p id="msgSucesso" style="display:none; color:green; font-weight: bold; margin-top: 1rem;">Encomenda registrada com sucesso!</p>
+      <div class="modal-body">
+        <form class="modal-form" id="formEncomenda">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="remetente">Remetente *</label>
+              <input type="text" id="remetente" name="remetente" required>
+            </div>
+            <div class="form-group">
+              <label for="destinatario">Destinatário *</label>
+              <input type="text" id="destinatario" name="destinatario" required>
+            </div>
+          </div>
+          
+          <div class="form-row">
+            <div class="form-group">
+              <label for="tipo">Tipo *</label>
+              <input type="text" id="tipo" name="tipo" required>
+            </div>
+            <div class="form-group">
+              <label for="identificador">Identificador *</label>
+              <input type="text" id="identificador" name="identificador" required>
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label for="observacao">Observação</label>
+            <textarea id="observacao" name="observacao" rows="3" placeholder="Informações adicionais sobre a encomenda..."></textarea>
+          </div>
+          
+          <input type="hidden" name="carimbo" id="dataCadastro">
+          
+          <div class="form-actions">
+            <button type="button" class="btn btn-outline" id="btnCancelar">Cancelar</button>
+            <button type="submit" class="btn btn-primary" id="btnSubmit">
+              📤 Registrar Encomenda
+            </button>
+          </div>
+        </form>
+        
+        <div id="msgSucesso" class="success-message" style="display: none;">
+          ✅ Encomenda registrada com sucesso!
+        </div>
+        
+        <div id="msgErro" class="error-message" style="display: none;">
+          ❌ Erro ao registrar encomenda. Tente novamente.
+        </div>
+      </div>
     </div>
   </div>
 
   <script>
-    const btn = document.getElementById("btnNovaEncomenda");
-    const modal = document.getElementById("modalForm");
-    const btnFechar = document.getElementById("btnFecharModal");
-    const form = document.getElementById("formEncomenda");
-    const msg = document.getElementById("msgSucesso");
+    // Configurações
+    const CONFIG = {
+      csvURL: "https://docs.google.com/spreadsheets/d/e/2PACX-1vQDrmqNR9BEgPo1hWtq5uEj6282P6zEBB3w2iIOXhwIIhFE1R5olVB_S1bP-3F_u3iGkSFjCchFolYr/pub?output=csv",
+      formBaixaURL: "https://docs.google.com/forms/d/e/1FAIpQLSfnWApRVsslQZQ8tcJZuKi6pP0lAEVKe1eU__mixDTMf1OGYQ/viewform",
+      scriptURL: "https://script.google.com/macros/s/AKfycbw2qWQJV_juYMktVTSiaNy6N80f6JheNFUJ6P9b746cbzh-GIXsf67XTVHBRIpHGoQ/exec"
+    };
 
-    btn.addEventListener("click", () => {
-      document.getElementById("dataCadastro").value = new Date().toLocaleString("pt-BR");
-      modal.style.display = "flex";
+    // Elementos DOM
+    const elementos = {
+      filtroTipo: document.getElementById("filtroTipo"),
+      campoBusca: document.getElementById("campoBusca"),
+      btnBuscar: document.getElementById("btnBuscar"),
+      resultados: document.getElementById("resultados"),
+      btnNovaEncomenda: document.getElementById("btnNovaEncomenda"),
+      modal: document.getElementById("modalForm"),
+      btnFecharModal: document.getElementById("btnFecharModal"),
+      btnCancelar: document.getElementById("btnCancelar"),
+      form: document.getElementById("formEncomenda"),
+      btnSubmit: document.getElementById("btnSubmit"),
+      msgSucesso: document.getElementById("msgSucesso"),
+      msgErro: document.getElementById("msgErro"),
+      dataCadastro: document.getElementById("dataCadastro"),
+      menuToggle: document.getElementById("menuToggle"),
+      sidebar: document.getElementById("sidebar")
+    };
+
+    // Estado da aplicação
+    let dadosCache = [];
+    let buscando = false;
+
+    // Inicialização
+    document.addEventListener('DOMContentLoaded', function() {
+      inicializarEventos();
     });
 
-    btnFechar.addEventListener("click", () => {
-      modal.style.display = "none";
-      form.reset();
-      msg.style.display = "none";
-    });
+    function inicializarEventos() {
+      // Menu mobile
+      elementos.menuToggle.addEventListener('click', () => {
+        elementos.sidebar.classList.toggle('active');
+      });
 
-    form.addEventListener("submit", async (e) => {
-      e.preventDefault();
+      document.addEventListener('click', (e) => {
+        if (window.innerWidth <= 768 && 
+            !elementos.sidebar.contains(e.target) && 
+            !elementos.menuToggle.contains(e.target)) {
+          elementos.sidebar.classList.remove('active');
+        }
+      });
 
-      const dados = new FormData(form);
+      // Filtros
+      elementos.filtroTipo.addEventListener('change', aoMudarFiltro);
+      elementos.campoBusca.addEventListener('input', aoDigitarBusca);
+      elementos.campoBusca.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          buscarEncomendas();
+        }
+      });
+      elementos.btnBuscar.addEventListener('click', buscarEncomendas);
+
+      // Modal
+      elementos.btnNovaEncomenda.addEventListener('click', abrirModal);
+      elementos.btnFecharModal.addEventListener('click', fecharModal);
+      elementos.btnCancelar.addEventListener('click', fecharModal);
+      elementos.form.addEventListener('submit', enviarFormulario);
+
+      // Fechar modal ao clicar fora
+      elementos.modal.addEventListener('click', (e) => {
+        if (e.target === elementos.modal) {
+          fecharModal();
+        }
+      });
+    }
+
+    function aoMudarFiltro() {
+      const tipoSelecionado = elementos.filtroTipo.value;
+      
+      if (tipoSelecionado) {
+        elementos.campoBusca.disabled = false;
+        elementos.campoBusca.placeholder = `Digite o ${tipoSelecionado}...`;
+        elementos.campoBusca.focus();
+        atualizarBotaoBusca();
+      } else {
+        elementos.campoBusca.disabled = true;
+        elementos.campoBusca.value = '';
+        elementos.campoBusca.placeholder = 'Digite para buscar...';
+        elementos.btnBuscar.disabled = true;
+        mostrarEstadoVazio();
+      }
+    }
+
+    function aoDigitarBusca() {
+      atualizarBotaoBusca();
+    }
+
+    function atualizarBotaoBusca() {
+      const temTipo = elementos.filtroTipo.value;
+      const temTermo = elementos.campoBusca.value.trim();
+      elementos.btnBuscar.disabled = !temTipo || !temTermo || buscando;
+    }
+
+    async function buscarEncomendas() {
+      if (buscando) return;
+      
+      const tipoFiltro = elementos.filtroTipo.value;
+      const termo = elementos.campoBusca.value.trim();
+      
+      if (!tipoFiltro || !termo) {
+        mostrarErro('Selecione um tipo de filtro e digite um termo para buscar.');
+        return;
+      }
+
+      buscando = true;
+      mostrarCarregando();
+      atualizarBotaoBusca();
+
+      try {
+        const dados = await carregarDados();
+        const resultados = filtrarDados(dados, tipoFiltro, termo);
+        mostrarResultados(resultados);
+      } catch (error) {
+        console.error('Erro ao buscar:', error);
+        mostrarErro('Erro ao carregar dados. Verifique sua conexão.');
+      } finally {
+        buscando = false;
+        atualizarBotaoBusca();
+      }
+    }
+
+    async function carregarDados() {
+      try {
+        const response = await fetch(CONFIG.csvURL);
+        if (!response.ok) throw new Error('Erro ao carregar dados');
+        
+        const csvText = await response.text();
+        return parseCSV(csvText);
+      } catch (error) {
+        throw new Error('Falha ao carregar dados do servidor');
+      }
+    }
+
+    function parseCSV(csvText) {
+      const linhas = csvText.trim().split('\n');
+      if (linhas.length < 2) return [];
+      
+      const cabecalho = linhas[0].split(',').map(col => col.trim().replace(/"/g, ''));
+      const dados = [];
+      
+      for (let i = 1; i < linhas.length; i++) {
+        const linha = linhas[i];
+        const valores = parseCSVLine(linha);
+        
+        if (valores.length === cabecalho.length) {
+          const obj = {};
+          cabecalho.forEach((col, index) => {
+            obj[col] = valores[index]?.trim().replace(/"/g, '') || '';
+          });
+          dados.push(obj);
+        }
+      }
+      
+      return dados;
+    }
+
+    function parseCSVLine(linha) {
+      const resultado = [];
+      let atual = '';
+      let dentroAspas = false;
+      
+      for (let i = 0; i < linha.length; i++) {
+        const char = linha[i];
+        
+        if (char === '"') {
+          dentroAspas = !dentroAspas;
+        } else if (char === ',' && !dentroAspas) {
+          resultado.push(atual);
+          atual = '';
+        } else {
+          atual += char;
+        }
+      }
+      
+      resultado.push(atual);
+      return resultado;
+    }
+
+    function filtrarDados(dados, tipo, termo) {
+      const termoUpper = termo.toUpperCase();
+      const campoMap = {
+        'identificador': 'Identificador',
+        'destinatario': 'Destinatário',
+        'unidade': 'Unidade Condominial'
+      };
+      
+      const campo = campoMap[tipo];
+      if (!campo) return [];
+      
+      return dados.filter(item => 
+        item[campo] && item[campo].toUpperCase().includes(termoUpper)
+      );
+    }
+
+    function mostrarCarregando() {
+      elementos.resultados.className = 'results-content loading';
+      elementos.resultados.innerHTML = `
+        <div>
+          <div class="loading-spinner"></div>
+          <p>Buscando encomendas...</p>
+        </div>
+      `;
+    }
+
+    function mostrarResultados(dados) {
+      elementos.resultados.className = 'results-content';
+      
+      if (dados.length === 0) {
+        elementos.resultados.innerHTML = `
+          <div class="empty-state">
+            <div class="icon">🔍</div>
+            <h3>Nenhuma encomenda encontrada</h3>
+            <p>Tente buscar com outros termos ou verifique a ortografia.</p>
+          </div>
+        `;
+        return;
+      }
+
+      const html = gerarTabelaResultados(dados);
+      elementos.resultados.innerHTML = html;
+    }
+
+    function gerarTabelaResultados(dados) {
+      const colunas = [
+        { key: 'Data de cadastro', label: 'Data' },
+        { key: 'Status', label: 'Status' },
+        { key: 'Identificador', label: 'Identificador' },
+        { key: 'Unidade Condominial', label: 'Unidade' },
+        { key: 'Remetente', label: 'Remetente' },
+        { key: 'Destinatário', label: 'Destinatário' },
+        { key: 'acoes', label: 'Ações' }
+      ];
+
+      let html = '<table><thead><tr>';
+      colunas.forEach(col => {
+        html += `<th>${col.label}</th>`;
+      });
+      html += '</tr></thead><tbody>';
+
+      dados.forEach(item => {
+        html += '<tr>';
+        colunas.forEach(col => {
+          if (col.key === 'acoes') {
+            const isEntregue = item['Status']?.toLowerCase() === 'entregue';
+            const desabilitado = isEntregue ? 'disabled' : '';
+            html += `
+              <td>
+                <button class="btn-action btn-baixa" 
+                        onclick="darBaixa('${item['Identificador']}')" 
+                        ${desabilitado}>
+                  ${isEntregue ? 'Entregue' : '📤 Dar Baixa'}
+                </button>
+              </td>
+            `;
+          } else if (col.key === 'Status') {
+            const status = item[col.key]?.toLowerCase() || 'cadastrado'; // Default para 'cadastrado'
+            html += `
+              <td>
+                <span class="status-badge ${status}">
+                  ${item[col.key] || 'Cadastrado'}
+                </span>
+              </td>
+            `;
+          } else {
+            html += `<td>${item[col.key] || '-'}</td>`;
+          }
+        });
+        html += '</tr>';
+      });
+
+      html += '</tbody></table>';
+      return html;
+    }
+
+    function mostrarEstadoVazio() {
+      elementos.resultados.className = 'results-content empty';
+      elementos.resultados.innerHTML = `
+        <div class="empty-state">
+          <div class="icon">📦</div>
+          <h3>Nenhuma busca realizada</h3>
+          <p>Selecione um tipo de filtro e digite um termo para buscar encomendas.</p>
+        </div>
+      `;
+    }
+
+    function mostrarErro(mensagem) {
+      elementos.resultados.className = 'results-content empty';
+      elementos.resultados.innerHTML = `
+        <div class="empty-state">
+          <div class="icon">❌</div>
+          <h3>Erro</h3>
+          <p>${mensagem}</p>
+        </div>
+      `;
+    }
+
+    function darBaixa(identificador) {
+      if (!identificador) {
+        alert('Identificador não encontrado.');
+        return;
+      }
+      
+      const url = `${CONFIG.formBaixaURL}?usp=pp_url&entry.1752641806=${encodeURIComponent(identificador)}`;
+      window.open(url, '_blank');
+    }
+
+    function abrirModal() {
+      elementos.dataCadastro.value = new Date().toLocaleString("pt-BR");
+      elementos.modal.style.display = 'flex';
+      elementos.form.reset();
+      elementos.msgSucesso.style.display = 'none';
+      elementos.msgErro.style.display = 'none';
+      
+      // Foco no primeiro campo
+      setTimeout(() => {
+        document.getElementById('remetente').focus();
+      }, 100);
+    }
+
+    function fecharModal() {
+      elementos.modal.style.display = 'none';
+      elementos.form.reset();
+      elementos.msgSucesso.style.display = 'none';
+      elementos.msgErro.style.display = 'none';
+    }
+
+    async function enviarFormulario(event) {
+      event.preventDefault();
+
+      elementos.btnSubmit.disabled = true;
+      elementos.btnSubmit.textContent = 'Registrando...';
+      elementos.msgSucesso.style.display = 'none';
+      elementos.msgErro.style.display = 'none';
+
+      const dados = new FormData(elementos.form);
       const json = Object.fromEntries(dados.entries());
 
       try {
-        await fetch("https://script.google.com/macros/s/AKfycbw2qWQJV_juYMktVTSiaNy6N80f6JheNFUJ6P9b746cbzh-GIXsf67XTVHBRIpHGoQ/exec", {
+        const response = await fetch(CONFIG.scriptURL, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(json)
         });
 
-        msg.style.display = "block";
-        form.reset();
+        if (!response.ok) {
+          throw new Error(`Erro HTTP: ${response.status}`);
+        }
+        
+        elementos.msgSucesso.style.display = 'block';
+        elementos.form.reset();
+        // Opcional: recarregar a busca após o registro se o modal fechar automaticamente
+        // setTimeout(() => { fecharModal(); buscarEncomendas(); }, 1500); 
+
       } catch (err) {
-        alert("Erro ao enviar. Verifique sua conexão ou fale com o administrador.");
-        console.error(err);
+        console.error("Erro ao enviar formulário:", err);
+        elementos.msgErro.style.display = 'block';
+        alert("Erro ao registrar encomenda. Verifique sua conexão ou fale com o administrador.");
+      } finally {
+        elementos.btnSubmit.disabled = false;
+        elementos.btnSubmit.textContent = '📤 Registrar Encomenda';
       }
-    });
+    }
   </script>
-  <script src="js/encomendas.js"></script>
 </body>
 </html>

@@ -3,41 +3,381 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Folhas de Assinatura</title>
+  <title>Folhas de Assinatura - Portal do Condomínio</title>
   <link rel="stylesheet" href="css/vars.css">
   <link rel="stylesheet" href="css/style.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Quicksand:wght@400;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    .folha-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: var(--space-xl);
+      padding-bottom: var(--space-lg);
+      border-bottom: 2px solid var(--color-primary-bg);
+    }
+    
+    .folha-title {
+      font-size: 2.25rem;
+      font-weight: 700;
+      color: var(--color-text-primary);
+      margin: 0;
+      display: flex;
+      align-items: center;
+      gap: var(--space-md);
+    }
+    
+    .folha-subtitle {
+      color: var(--color-text-secondary);
+      font-size: 1.125rem;
+      margin: var(--space-sm) 0 0 0;
+    }
+    
+    .folha-container {
+      display: grid;
+      grid-template-columns: 1fr 350px;
+      gap: var(--space-2xl);
+      margin-top: var(--space-xl);
+    }
+    
+    .input-section {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-lg);
+    }
+    
+    .input-section h3 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--color-text-primary);
+      margin: 0;
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+    }
+    
+    .input-section p {
+      color: var(--color-text-secondary);
+      margin: 0;
+      line-height: 1.6;
+    }
+    
+    .textarea-container {
+      position: relative;
+      flex: 1;
+    }
+    
+    .textarea-container textarea {
+      width: 100%;
+      height: 450px;
+      background: var(--color-surface);
+      border: 2px solid var(--border-color);
+      border-radius: var(--border-radius-lg);
+      resize: vertical;
+      padding: var(--space-lg);
+      font-size: 14px;
+      font-family: 'Fira Code', 'Monaco', 'Menlo', monospace;
+      color: var(--color-text-primary);
+      transition: all var(--transition-fast);
+      line-height: 1.5;
+      min-height: 300px;
+    }
+    
+    .textarea-container textarea:focus {
+      outline: none;
+      border-color: var(--color-primary);
+      box-shadow: 0 0 0 3px var(--color-primary-bg);
+    }
+    
+    .textarea-container textarea::placeholder {
+      color: var(--color-text-muted);
+      font-style: italic;
+    }
+    
+    .textarea-info {
+      position: absolute;
+      bottom: var(--space-md);
+      right: var(--space-md);
+      background: var(--color-surface);
+      color: var(--color-text-muted);
+      padding: var(--space-sm) var(--space-md);
+      border-radius: var(--border-radius);
+      font-size: 0.75rem;
+      border: 1px solid var(--border-color);
+      pointer-events: none;
+    }
+    
+    .controls-section {
+      background: var(--color-surface);
+      border: 1px solid var(--border-color);
+      border-radius: var(--border-radius-lg);
+      padding: var(--space-xl);
+      height: fit-content;
+      box-shadow: var(--shadow-sm);
+    }
+    
+    .controls-section h3 {
+      font-size: 1.125rem;
+      font-weight: 600;
+      color: var(--color-text-primary);
+      margin: 0 0 var(--space-lg) 0;
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+    }
+    
+    .form-group {
+      margin-bottom: var(--space-lg);
+    }
+    
+    .form-group label {
+      display: block;
+      margin-bottom: var(--space-sm);
+      font-weight: 600;
+      color: var(--color-text-primary);
+      font-size: 0.875rem;
+    }
+    
+    .form-group select {
+      width: 100%;
+      padding: var(--space-md);
+      border: 1px solid var(--border-color);
+      border-radius: var(--border-radius);
+      font-size: 1rem;
+      font-family: var(--font-primary);
+      transition: all var(--transition-fast);
+      background: var(--color-surface);
+      color: var(--color-text-primary);
+      cursor: pointer;
+    }
+    
+    .form-group select:focus {
+      outline: none;
+      border-color: var(--color-primary);
+      box-shadow: 0 0 0 3px var(--color-primary-bg);
+    }
+    
+    .form-group select option {
+      padding: var(--space-sm);
+    }
+    
+    .generate-btn {
+      width: 100%;
+      padding: var(--space-lg);
+      background: var(--color-primary);
+      color: var(--color-text-inverse);
+      border: none;
+      border-radius: var(--border-radius);
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all var(--transition-fast);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--space-sm);
+      font-family: var(--font-primary);
+      min-height: 48px;
+    }
+    
+    .generate-btn:hover {
+      background: var(--color-primary-dark);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+    }
+    
+    .generate-btn:active {
+      transform: translateY(0);
+    }
+    
+    .generate-btn:disabled {
+      background: var(--color-text-muted);
+      cursor: not-allowed;
+      transform: none;
+    }
+    
+    .info-card {
+      background: var(--color-primary-bg);
+      border: 1px solid var(--color-primary-light);
+      border-radius: var(--border-radius);
+      padding: var(--space-lg);
+      margin-bottom: var(--space-lg);
+    }
+    
+    .info-card h4 {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--color-primary-dark);
+      margin: 0 0 var(--space-sm) 0;
+    }
+    
+    .info-card p {
+      color: var(--color-primary-dark);
+      margin: 0;
+      font-size: 0.875rem;
+      line-height: 1.5;
+    }
+    
+    .info-card ul {
+      margin: var(--space-sm) 0 0 0;
+      padding-left: var(--space-lg);
+      color: var(--color-primary-dark);
+      font-size: 0.875rem;
+    }
+    
+    .info-card li {
+      margin-bottom: var(--space-xs);
+    }
+    
+    .status-indicator {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+      margin-top: var(--space-md);
+      font-size: 0.875rem;
+      color: var(--color-text-secondary);
+    }
+    
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--color-text-muted);
+    }
+    
+    .status-dot.ready {
+      background: var(--color-success);
+    }
+    
+    /* Responsividade */
+    @media (max-width: 1024px) {
+      .folha-container {
+        grid-template-columns: 1fr;
+        gap: var(--space-xl);
+      }
+      
+      .controls-section {
+        order: -1;
+      }
+    }
+    
+    @media (max-width: 768px) {
+      .folha-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--space-md);
+      }
+      
+      .folha-title {
+        font-size: 1.875rem;
+      }
+      
+      .textarea-container textarea {
+        height: 350px;
+      }
+      
+      .controls-section {
+        padding: var(--space-lg);
+      }
+    }
+    
+    @media (max-width: 480px) {
+      .folha-title {
+        font-size: 1.5rem;
+      }
+      
+      .textarea-container textarea {
+        height: 300px;
+        font-size: 12px;
+      }
+    }
+  </style>
 </head>
 <body class="layout">
-  <aside class="sidebar">
-    <h2>Menu</h2>
+  <button class="menu-toggle" id="menuToggle">☰</button>
+  
+  <aside class="sidebar" id="sidebar">
+    <h2>Portal do Condomínio</h2>
     <nav>
       <ul>
-        <li><a href="index.html">Início</a></li>
-        <li><a href="folhas.html">Folhas de Assinatura</a></li>
-        <li><a href="encomendas.html">Registro de Encomendas</a></li>
+        <li><a href="index.html">🏠 Início</a></li>
+        <li><a href="folhas.html" class="active">📋 Folhas de Assinatura</a></li>
+        <li><a href="encomendas.html">📦 Registro de Encomendas</a></li>
       </ul>
     </nav>
   </aside>
+  
   <main class="main-content">
-    <h1>Folha de Assinaturas</h1>
-    <div class="folha-container">
-      <textarea id="entrada" placeholder="Cole aqui os dados copiados do sistema"></textarea>
-      <div class="controls">
-        <select id="torre">
-          <option value="ADMINISTRACAO" selected>Administração</option>
-          <option value="TORRE A">Torre A</option>
-          <option value="TORRE B">Torre B</option>
-          <option value="TORRE C">Torre C</option>
-          <option value="TORRE D">Torre D</option>
-          <option value="TORRE E">Torre E</option>
-        </select>
-        <button onclick="gerarTabela()">Gerar para Impressão</button>
+    <div class="fade-in">
+      <div class="folha-header">
+        <div>
+          <h1 class="folha-title">
+            📋 Folhas de Assinatura
+          </h1>
+          <p class="folha-subtitle">Gere folhas organizadas por torre para controle de entregas</p>
+        </div>
+      </div>
+      
+      <div class="folha-container">
+        <div class="input-section">
+          <div>
+            <h3>📥 Dados do Sistema</h3>
+            <p>Cole abaixo os dados copiados diretamente do sistema de correspondência:</p>
+          </div>
+          
+          <div class="textarea-container">
+            <textarea 
+              id="entrada" 
+              placeholder="Cole aqui os dados brutos do sistema...&#10;&#10;Exemplo:&#10;01/01/2024    SEDEX    AA123456789BR    Torre A - 101    Correios    João Silva&#10;01/01/2024    PAC      BB987654321BR    Torre B - 205    Magazine    Maria Santos"
+            ></textarea>
+            <div class="textarea-info" id="textareaInfo">
+              0 linhas
+            </div>
+          </div>
+          
+          <div class="status-indicator">
+            <div class="status-dot" id="statusDot"></div>
+            <span id="statusText">Aguardando dados...</span>
+          </div>
+        </div>
+        
+        <div class="controls-section">
+          <h3>⚙️ Configurações</h3>
+          
+          <div class="info-card">
+            <h4>ℹ️ Como usar</h4>
+            <p>Selecione a torre desejada e clique em "Gerar" para criar a folha formatada para impressão.</p>
+            <ul>
+              <li>Dados são automaticamente organizados por unidade</li>
+              <li>Campos de assinatura são incluídos</li>
+              <li>Layout otimizado para impressão</li>
+            </ul>
+          </div>
+          
+          <div class="form-group">
+            <label for="torre">🏢 Selecionar Torre:</label>
+            <select id="torre">
+              <option value="ADMINISTRACAO">🏛️ Administração</option>
+              <option value="TORRE A">🏢 Torre A</option>
+              <option value="TORRE B">🏢 Torre B</option>
+              <option value="TORRE C">🏢 Torre C</option>
+              <option value="TORRE D">🏢 Torre D</option>
+              <option value="TORRE E">🏢 Torre E</option>
+            </select>
+          </div>
+          
+          <button class="generate-btn" onclick="gerarTabela()" id="generateBtn" disabled>
+            🖨️ Gerar Folha para Impressão
+          </button>
+        </div>
       </div>
     </div>
   </main>
+  
+  <div id="fallbackArea" style="display: none;"></div>
+  
   <script src="js/folhas.js"></script>
 </body>
 </html>
