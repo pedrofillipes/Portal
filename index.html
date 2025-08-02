@@ -1,0 +1,1180 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Encomendas</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+    <style>
+        /* styles.css */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Header */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 70px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            padding: 0 2rem;
+            z-index: 1000;
+        }
+
+        .header h1 {
+            color: #333;
+            font-size: 1.5rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .header .user-info {
+            margin-left: auto;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .header .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 280px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-right: 1px solid rgba(255, 255, 255, 0.2);
+            padding-top: 90px;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+            padding: 1rem;
+        }
+
+        .sidebar-menu li {
+            margin-bottom: 0.5rem;
+        }
+
+        .sidebar-menu a {
+            display: flex;
+            align-items: center;
+            padding: 1rem;
+            color: white;
+            text-decoration: none;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            gap: 0.75rem;
+        }
+
+        .sidebar-menu a:hover,
+        .sidebar-menu a.active {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateX(5px);
+        }
+
+        .sidebar-menu .material-symbols-outlined {
+            font-size: 20px;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            padding: 90px 2rem 2rem;
+            overflow-y: auto;
+        }
+
+        .page {
+            display: none;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            animation: fadeIn 0.5s ease;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .page-title {
+            font-size: 2rem;
+            color: #333;
+            margin-bottom: 2rem;
+            font-weight: 600;
+        }
+
+        /* Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem;
+            border-radius: 16px;
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+            transition: transform 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-card h3 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-card p {
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+
+        /* Forms */
+        .form-section {
+            background: #f8f9fa;
+            padding: 2rem;
+            border-radius: 16px;
+            margin-bottom: 2rem;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #333;
+            font-weight: 500;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 1rem;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            text-align: center;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #dc3545 0%, #fd7e14 100%);
+            color: white;
+        }
+
+        /* Add Icon Button */
+        .btn-add-icon {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            width: 50px;
+            height: 50px;
+            border: none;
+            border-radius: 50%;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+        }
+
+        .btn-add-icon:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 8px 25px rgba(40, 167, 69, 0.4);
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
+            z-index: 2000;
+            animation: fadeInModal 0.3s ease;
+        }
+
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            overflow-y: auto;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 20px;
+            padding: 1.5rem;
+            width: 100%;
+            max-width: 800px;
+            max-height: 85vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: slideInModal 0.3s ease;
+            margin: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #e9ecef;
+        }
+
+        .modal-header h3 {
+            color: #333;
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 2rem;
+            color: #666;
+            cursor: pointer;
+            padding: 0;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .close-modal:hover {
+            background: #f8f9fa;
+            color: #333;
+        }
+
+        @keyframes fadeInModal {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideInModal {
+            from { transform: translateY(-50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        /* Table */
+        .table-container {
+            background: white;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .table th,
+        .table td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid #e9ecef;
+            text-transform: uppercase;
+        }
+
+        .table th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .table tr:hover {
+            background: #f8f9fa;
+        }
+
+        /* Status badges */
+        .status-badge {
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .status-pendente {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-entregue {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+
+        /* Search */
+        .search-container {
+            margin-bottom: 2rem;
+            position: relative;
+        }
+
+        .search-input {
+            width: 100%;
+            max-width: 400px;
+            padding: 1rem 1rem 1rem 3rem;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            font-size: 1rem;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #666;
+            font-size: 20px;
+        }
+
+        /* Info Button */
+        .btn-info {
+            background: linear-gradient(135deg, #17a2b8 0%, #20c997 100%);
+            color: white;
+            width: 30px;
+            height: 30px;
+            border: none;
+            border-radius: 50%;
+            font-size: 0.875rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 0.5rem;
+        }
+
+        .btn-info:hover {
+            transform: translateY(-2px) scale(1.1);
+            box-shadow: 0 4px 15px rgba(23, 162, 184, 0.3);
+        }
+
+        /* Modal de Info */
+        .modal-info {
+            max-width: 400px;
+        }
+
+        .info-content {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 10px;
+            margin-top: 1rem;
+        }
+
+        .info-item {
+            margin-bottom: 0.8rem;
+            display: flex;
+            align-items: flex-start;
+            gap: 0.5rem;
+        }
+
+        .info-label {
+            font-weight: 600;
+            color: #495057;
+            min-width: 80px;
+        }
+
+        .info-value {
+            color: #333;
+            text-transform: uppercase;
+        }
+
+        /* Confirmation Modal */
+        .modal-confirm {
+            max-width: 400px;
+        }
+
+        .confirm-content {
+            text-align: center;
+            padding: 1rem 0;
+        }
+
+        .confirm-message {
+            font-size: 1.1rem;
+            color: #495057;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .confirm-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 250px;
+                transform: translateX(-100%);
+            }
+
+            .sidebar.open {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                padding: 90px 1rem 1rem;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .modal-content {
+                width: 95%;
+                max-width: none;
+                padding: 1rem;
+                margin: 1rem;
+                max-height: 90vh;
+            }
+
+            .modal.active {
+                align-items: flex-start;
+                padding-top: 1rem;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+                gap: 0.8rem;
+            }
+
+            .form-group {
+                margin-bottom: 0.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <h1>
+            <span class="material-symbols-outlined">inventory_2</span>
+            Sistema de Encomendas
+        </h1>
+        <div class="user-info">
+            <span>Bem-vindo!</span>
+            <div class="user-avatar">
+                <span class="material-symbols-outlined">person</span>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- Sidebar -->
+        <nav class="sidebar">
+            <ul class="sidebar-menu">
+                <li><a href="#" class="menu-item active" data-page="home">
+                    <span class="material-symbols-outlined">dashboard</span>
+                    <span>Página Inicial</span>
+                </a></li>
+                <li><a href="#" class="menu-item" data-page="encomendas">
+                    <span class="material-symbols-outlined">inventory_2</span>
+                    <span>Encomendas</span>
+                </a></li>
+                <li><a href="#" class="menu-item" data-page="folhas">
+                    <span class="material-symbols-outlined">assignment</span>
+                    <span>Folhas de Assinatura</span>
+                </a></li>
+            </ul>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Página Inicial -->
+            <div id="home" class="page active">
+                <h2 class="page-title">Dashboard</h2>
+                
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <h3 id="total-encomendas">0</h3>
+                        <p>Total de Encomendas</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3 id="pendentes">0</h3>
+                        <p>Pendentes</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3 id="entregues">0</h3>
+                        <p>Entregues</p>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h3>Resumo do Sistema</h3>
+                    <p>Bem-vindo ao Sistema de Controle de Encomendas. Aqui você pode:</p>
+                    <ul style="margin: 1rem 0; padding-left: 2rem;">
+                        <li>Cadastrar novas encomendas</li>
+                        <li>Consultar encomendas existentes</li>
+                        <li>Dar baixa em encomendas entregues</li>
+                        <li>Gerenciar folhas de assinatura</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Página de Encomendas -->
+            <div id="encomendas" class="page">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 2rem;">
+                    <h2 class="page-title" style="margin-bottom: 0;">Controle de Encomendas</h2>
+                    <button class="btn-add-icon" id="btn-add-encomenda">
+                        <span class="material-symbols-outlined">add</span>
+                    </button>
+                </div>
+
+                <!-- Busca -->
+                <div class="search-container">
+                    <span class="material-symbols-outlined search-icon">search</span>
+                    <input type="text" id="search-input" class="search-input" placeholder="Buscar por destinatário, remetente ou código...">
+                </div>
+
+                <!-- Lista de Encomendas -->
+                <div class="table-container">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Destinatário</th>
+                                <th>Remetente</th>
+                                <th>Tipo</th>
+                                <th>Data Cadastro</th>
+                                <th>Status</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="encomendas-table">
+                            <!-- Dados serão inseridos via JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Página de Folhas de Assinatura -->
+            <div id="folhas" class="page">
+                <h2 class="page-title">Folhas de Assinatura</h2>
+                <div class="form-section">
+                    <p>Esta funcionalidade será implementada em breve.</p>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal de Cadastro -->
+    <div id="modal-cadastro" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Nova Encomenda</h3>
+                <button class="close-modal" id="close-modal">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+            
+            <form id="form-encomenda">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="destinatario">Destinatário</label>
+                        <input type="text" id="destinatario" name="destinatario" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="remetente">Remetente</label>
+                        <input type="text" id="remetente" name="remetente" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="endereco">Endereço</label>
+                        <input type="text" id="endereco" name="endereco">
+                    </div>
+                    <div class="form-group">
+                        <label for="tipo">Tipo de Encomenda</label>
+                        <select id="tipo" name="tipo" required>
+                            <option value="">Selecione...</option>
+                            <option value="caixa">Caixa</option>
+                            <option value="carta">Carta</option>
+                            <option value="pacote">Pacote</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="codigo">Código de Rastreamento</label>
+                        <input type="text" id="codigo" name="codigo">
+                    </div>
+                    <div class="form-group">
+                        <label for="observacoes">Observações</label>
+                        <textarea id="observacoes" name="observacoes" rows="2"></textarea>
+                    </div>
+                </div>
+                <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 1rem;">
+                    <button type="button" class="btn" id="cancel-form" style="background: #6c757d; color: white;">
+                        <span class="material-symbols-outlined">cancel</span>
+                        Cancelar
+                    </button>
+                    <button type="submit" class="btn btn-primary">
+                        <span class="material-symbols-outlined">save</span>
+                        Cadastrar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal de Informações da Entrega -->
+    <div id="modal-info" class="modal">
+        <div class="modal-content modal-info">
+            <div class="modal-header">
+                <h3>Informações da Entrega</h3>
+                <button class="close-modal" id="close-modal-info">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+            
+            <div class="info-content" id="info-details">
+                <!-- Conteúdo será preenchido via JavaScript -->
+            </div>
+            
+            <div style="display: flex; justify-content: center; margin-top: 1rem;">
+                <button type="button" class="btn btn-primary" id="close-info">
+                    <span class="material-symbols-outlined">close</span>
+                    Fechar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Confirmação de Exclusão -->
+    <div id="modal-confirm" class="modal">
+        <div class="modal-content modal-confirm">
+            <div class="modal-header">
+                <h3>Confirmar Exclusão</h3>
+                <button class="close-modal" id="close-modal-confirm">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+            
+            <div class="confirm-content">
+                <div class="confirm-message">
+                    <span class="material-symbols-outlined" style="color: #dc3545; font-size: 2rem;">warning</span>
+                    <div>
+                        Tem certeza que deseja excluir esta encomenda?<br>
+                        <strong>Esta ação não pode ser desfeita.</strong>
+                    </div>
+                </div>
+                
+                <div class="confirm-buttons">
+                    <button type="button" class="btn" id="cancel-delete" style="background: #6c757d; color: white;">
+                        <span class="material-symbols-outlined">cancel</span>
+                        Cancelar
+                    </button>
+                    <button type="button" class="btn btn-danger" id="confirm-delete">
+                        <span class="material-symbols-outlined">delete</span>
+                        Excluir
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Baixa -->
+    <div id="modal-baixa" class="modal">
+        <div class="modal-content" style="max-width: 500px;">
+            <div class="modal-header">
+                <h3>Dar Baixa na Encomenda</h3>
+                <button class="close-modal" id="close-modal-baixa">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+            
+            <form id="form-baixa">
+                <input type="hidden" id="baixa-encomenda-id">
+                <div class="form-group">
+                    <label for="nome-recebedor">Nome do Recebedor</label>
+                    <input type="text" id="nome-recebedor" name="nome-recebedor" required style="text-transform: uppercase;">
+                </div>
+                <div class="form-group">
+                    <label for="documento-recebedor">Documento (CPF/RG)</label>
+                    <input type="text" id="documento-recebedor" name="documento-recebedor" required style="text-transform: uppercase;">
+                </div>
+                <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 1rem;">
+                    <button type="button" class="btn" id="cancel-baixa" style="background: #6c757d; color: white;">
+                        <span class="material-symbols-outlined">cancel</span>
+                        Cancelar
+                    </button>
+                    <button type="submit" class="btn btn-success">
+                        <span class="material-symbols-outlined">check_circle</span>
+                        Confirmar Baixa
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // app.js - Sistema de Controle de Encomendas
+        class EncomendaManager {
+            constructor() {
+                this.encomendas = this.loadEncomendas();
+                this.currentId = this.getNextId();
+                this.init();
+            }
+
+            init() {
+                this.bindEvents();
+                this.renderEncomendas();
+                this.updateStats();
+                this.initNavigation();
+            }
+
+            bindEvents() {
+                // Formulário de cadastro
+                document.getElementById('form-encomenda').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    this.cadastrarEncomenda();
+                });
+
+                // Busca
+                document.getElementById('search-input').addEventListener('input', (e) => {
+                    this.filterEncomendas(e.target.value);
+                });
+
+                // Modal events
+                document.getElementById('btn-add-encomenda').addEventListener('click', () => {
+                    this.openModal();
+                });
+
+                document.getElementById('close-modal').addEventListener('click', () => {
+                    this.closeModal();
+                });
+
+                document.getElementById('cancel-form').addEventListener('click', () => {
+                    this.closeModal();
+                });
+
+                // Modal de baixa events
+                document.getElementById('form-baixa').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    this.confirmarBaixa();
+                });
+
+                document.getElementById('close-modal-baixa').addEventListener('click', () => {
+                    this.closeBaixaModal();
+                });
+
+                document.getElementById('cancel-baixa').addEventListener('click', () => {
+                    this.closeBaixaModal();
+                });
+
+                // Modal de info events
+                document.getElementById('close-modal-info').addEventListener('click', () => {
+                    this.closeInfoModal();
+                });
+
+                document.getElementById('close-info').addEventListener('click', () => {
+                    this.closeInfoModal();
+                });
+
+                // Modal de confirmação events
+                document.getElementById('close-modal-confirm').addEventListener('click', () => {
+                    this.closeConfirmModal();
+                });
+
+                document.getElementById('cancel-delete').addEventListener('click', () => {
+                    this.closeConfirmModal();
+                });
+
+                document.getElementById('confirm-delete').addEventListener('click', () => {
+                    this.excluirEncomenda();
+                });
+
+                // Close modals when clicking outside
+                document.getElementById('modal-cadastro').addEventListener('click', (e) => {
+                    if (e.target.id === 'modal-cadastro') {
+                        this.closeModal();
+                    }
+                });
+
+                document.getElementById('modal-baixa').addEventListener('click', (e) => {
+                    if (e.target.id === 'modal-baixa') {
+                        this.closeBaixaModal();
+                    }
+                });
+
+                document.getElementById('modal-info').addEventListener('click', (e) => {
+                    if (e.target.id === 'modal-info') {
+                        this.closeInfoModal();
+                    }
+                });
+
+                document.getElementById('modal-confirm').addEventListener('click', (e) => {
+                    if (e.target.id === 'modal-confirm') {
+                        this.closeConfirmModal();
+                    }
+                });
+
+                // Close modals with ESC key
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'Escape') {
+                        this.closeModal();
+                        this.closeBaixaModal();
+                        this.closeInfoModal();
+                        this.closeConfirmModal();
+                    }
+                });
+            }
+
+            initNavigation() {
+                const menuItems = document.querySelectorAll('.menu-item');
+                const pages = document.querySelectorAll('.page');
+
+                menuItems.forEach(item => {
+                    item.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        
+                        // Remove active class from all items
+                        menuItems.forEach(mi => mi.classList.remove('active'));
+                        pages.forEach(page => page.classList.remove('active'));
+                        
+                        // Add active class to clicked item
+                        item.classList.add('active');
+                        
+                        // Show corresponding page
+                        const targetPage = item.getAttribute('data-page');
+                        document.getElementById(targetPage).classList.add('active');
+                    });
+                });
+            }
+
+            cadastrarEncomenda() {
+                const form = document.getElementById('form-encomenda');
+                const formData = new FormData(form);
+                
+                const encomenda = {
+                    id: this.currentId++,
+                    destinatario: formData.get('destinatario'),
+                    remetente: formData.get('remetente'),
+                    endereco: formData.get('endereco'),
+                    tipo: formData.get('tipo'),
+                    codigo: formData.get('codigo'),
+                    observacoes: formData.get('observacoes'),
+                    dataCadastro: new Date().toLocaleDateString('pt-BR'),
+                    status: 'pendente'
+                };
+
+                this.encomendas.push(encomenda);
+                this.saveEncomendas();
+                this.renderEncomendas();
+                this.updateStats();
+                
+                form.reset();
+                this.closeModal();
+                alert('Encomenda cadastrada com sucesso!');
+            }
+
+            darBaixa(id) {
+                this.currentBaixaId = id;
+                this.openBaixaModal();
+            }
+
+            confirmarBaixa() {
+                const form = document.getElementById('form-baixa');
+                const formData = new FormData(form);
+                const id = this.currentBaixaId;
+                
+                const encomenda = this.encomendas.find(e => e.id === id);
+                if (encomenda) {
+                    const agora = new Date();
+                    encomenda.status = 'entregue';
+                    encomenda.dataEntrega = agora.toLocaleDateString('pt-BR');
+                    encomenda.horaEntrega = agora.toLocaleTimeString('pt-BR');
+                    encomenda.nomeRecebedor = formData.get('nome-recebedor');
+                    encomenda.documentoRecebedor = formData.get('documento-recebedor');
+                    
+                    this.saveEncomendas();
+                    this.renderEncomendas();
+                    this.updateStats();
+                    this.closeBaixaModal();
+                    alert(`Baixa realizada com sucesso!\nRecebedor: ${encomenda.nomeRecebedor}\nData/Hora: ${encomenda.dataEntrega} às ${encomenda.horaEntrega}`);
+                }
+            }
+
+            excluirEncomenda() {
+                const id = this.currentDeleteId;
+                this.encomendas = this.encomendas.filter(e => e.id !== id);
+                this.saveEncomendas();
+                this.renderEncomendas();
+                this.updateStats();
+                this.closeConfirmModal();
+                alert('Encomenda excluída com sucesso!');
+            }
+
+            confirmarExclusao(id) {
+                this.currentDeleteId = id;
+                this.openConfirmModal();
+            }
+
+            mostrarInfoEntrega(id) {
+                const encomenda = this.encomendas.find(e => e.id === id);
+                if (encomenda && encomenda.status === 'entregue') {
+                    const infoDetails = document.getElementById('info-details');
+                    infoDetails.innerHTML = `
+                        <div class="info-item">
+                            <span class="material-symbols-outlined" style="color: #666; margin-right: 0.5rem;">event</span>
+                            <span class="info-label">Data:</span>
+                            <span class="info-value">${encomenda.dataEntrega}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="material-symbols-outlined" style="color: #666; margin-right: 0.5rem;">schedule</span>
+                            <span class="info-label">Hora:</span>
+                            <span class="info-value">${encomenda.horaEntrega}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="material-symbols-outlined" style="color: #666; margin-right: 0.5rem;">person</span>
+                            <span class="info-label">Recebedor:</span>
+                            <span class="info-value">${encomenda.nomeRecebedor}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="material-symbols-outlined" style="color: #666; margin-right: 0.5rem;">badge</span>
+                            <span class="info-label">Documento:</span>
+                            <span class="info-value">${encomenda.documentoRecebedor}</span>
+                        </div>
+                    `;
+                    this.openInfoModal();
+                }
+            }
+
+            renderEncomendas(filteredEncomendas = null) {
+                const tbody = document.getElementById('encomendas-table');
+                const encomendas = filteredEncomendas || this.encomendas;
+                
+                tbody.innerHTML = '';
+                
+                encomendas.forEach(encomenda => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${encomenda.id}</td>
+                        <td>${encomenda.destinatario}</td>
+                        <td>${encomenda.remetente}</td>
+                        <td>${encomenda.tipo}</td>
+                        <td>${encomenda.dataCadastro}</td>
+                        <td>
+                            <span class="status-badge status-${encomenda.status}">
+                                <span class="material-symbols-outlined">${encomenda.status === 'pendente' ? 'schedule' : 'check_circle'}</span>
+                                ${encomenda.status === 'pendente' ? 'Pendente' : 'Entregue'}
+                            </span>
+                        </td>
+                        <td>
+                            ${encomenda.status === 'pendente' ? 
+                                `<button class="btn btn-success" onclick="app.darBaixa(${encomenda.id})" style="margin-right: 0.5rem; padding: 0.5rem 1rem; font-size: 0.875rem;">
+                                    <span class="material-symbols-outlined">task_alt</span>
+                                    Dar Baixa
+                                </button>` : 
+                                `<button class="btn-info" onclick="app.mostrarInfoEntrega(${encomenda.id})" title="Ver informações da entrega">
+                                    <span class="material-symbols-outlined">info</span>
+                                </button>`
+                            }
+                            <button class="btn btn-danger" onclick="app.confirmarExclusao(${encomenda.id})" style="padding: 0.5rem 1rem; font-size: 0.875rem;">
+                                <span class="material-symbols-outlined">delete</span>
+                                Excluir
+                            </button>
+                        </td>
+                    `;
+                    tbody.appendChild(row);
+                });
+            }
+
+            filterEncomendas(searchTerm) {
+                if (!searchTerm) {
+                    this.renderEncomendas();
+                    return;
+                }
+
+                const filtered = this.encomendas.filter(encomenda => 
+                    encomenda.destinatario.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                    encomenda.remetente.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                    (encomenda.codigo && encomenda.codigo.toLowerCase().includes(searchTerm.toLowerCase()))
+                );
+
+                this.renderEncomendas(filtered);
+            }
+
+            updateStats() {
+                const total = this.encomendas.length;
+                const pendentes = this.encomendas.filter(e => e.status === 'pendente').length;
+                const entregues = this.encomendas.filter(e => e.status === 'entregue').length;
+
+                document.getElementById('total-encomendas').textContent = total;
+                document.getElementById('pendentes').textContent = pendentes;
+                document.getElementById('entregues').textContent = entregues;
+            }
+
+            loadEncomendas() {
+                const saved = JSON.parse(sessionStorage.getItem('encomendas') || '[]');
+                return saved;
+            }
+
+            saveEncomendas() {
+                sessionStorage.setItem('encomendas', JSON.stringify(this.encomendas));
+            }
+
+            getNextId() {
+                const maxId = this.encomendas.reduce((max, e) => Math.max(max, e.id), 0);
+                return maxId + 1;
+            }
+
+            openModal() {
+                document.getElementById('modal-cadastro').classList.add('active');
+                document.body.style.overflow = 'hidden';
+            }
+
+            closeModal() {
+                document.getElementById('modal-cadastro').classList.remove('active');
+                document.body.style.overflow = 'auto';
+                document.getElementById('form-encomenda').reset();
+            }
+
+            openBaixaModal() {
+                document.getElementById('modal-baixa').classList.add('active');
+                document.body.style.overflow = 'hidden';
+            }
+
+            closeBaixaModal() {
+                document.getElementById('modal-baixa').classList.remove('active');
+                document.body.style.overflow = 'auto';
+                document.getElementById('form-baixa').reset();
+            }
+
+            openInfoModal() {
+                document.getElementById('modal-info').classList.add('active');
+                document.body.style.overflow = 'hidden';
+            }
+
+            closeInfoModal() {
+                document.getElementById('modal-info').classList.remove('active');
+                document.body.style.overflow = 'auto';
+            }
+
+            openConfirmModal() {
+                document.getElementById('modal-confirm').classList.add('active');
+                document.body.style.overflow = 'hidden';
+            }
+
+            closeConfirmModal() {
+                document.getElementById('modal-confirm').classList.remove('active');
+                document.body.style.overflow = 'auto';
+            }
+        }
+
+        // Inicializar aplicação
+        const app = new EncomendaManager();
+    </script>
+</body>
+</html>
