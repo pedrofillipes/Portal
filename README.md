@@ -38,14 +38,3 @@ O sistema é dividido em duas seções principais:
 ## ⚙️ Como Usar
 
 Este projeto **não requer servidor backend**. Você pode executá-lo diretamente no seu navegador.
-
-### Passos:
-
-1. Clone ou baixe o repositório:
-
-   ```bash
-   git clone https://github.com/seu-usuario/nome-do-repositorio.git
-
-
-O projeto é organizado de forma simples e modular:
-
