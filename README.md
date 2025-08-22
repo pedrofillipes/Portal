@@ -29,11 +29,13 @@ O sistema é dividido em duas seções principais:
 
 ## 📁 Estrutura do Projeto
 
-├── index.html # Estrutura principal da página e código CSS embutido.
+├── index.html # Estrutura principal da página.
 
 ├── folhas.js # Lógica para o Gerador de Folhas de Assinatura.
 
 ├── app.js # Lógica para o Sistema de Controle de Encomendas (dashboard, CRUD, etc.).
+
+├── styles.css # Customização de aparencia e responsividade.
 
 └── README.md # Documentação do projeto (este arquivo).
 
