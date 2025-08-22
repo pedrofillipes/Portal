@@ -28,12 +28,11 @@ O sistema é dividido em duas seções principais:
 - **Google Material Symbols**: Ícones utilizados na interface para melhorar a usabilidade.
 
 ## 📁 Estrutura do Projeto
+
 ├── index.html # Estrutura principal da página e código CSS embutido.
 ├── folhas.js # Lógica para o Gerador de Folhas de Assinatura.
 ├── app.js # Lógica para o Sistema de Controle de Encomendas (dashboard, CRUD, etc.).
 └── README.md # Documentação do projeto (este arquivo).
-
-> **Nota:** O código CSS foi mantido no arquivo `index.html` para simplificar o projeto e reduzir o número de arquivos.
 
 ## ⚙️ Como Usar
 
