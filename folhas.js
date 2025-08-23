@@ -1,157 +1,104 @@
-// folhas.js - Gerador de Folha de Assinaturas
+// folhas.js - Gerador de Folha de Assinaturas (Método de Colar)
 function gerarTabela() {
-  const torreSelecionada = document.getElementById('torre').value.trim();
-  const isAdministracao = torreSelecionada === 'ADMINISTRACAO';
+    const torreSelecionada = document.getElementById('torre').value.trim();
+    const isAdministracao = torreSelecionada === 'ADMINISTRACAO';
 
-  const entrada = document.getElementById('entrada').value.trim();
-  if (!entrada) {
-    alert("Por favor, cole os dados brutos antes de continuar.");
-    return;
-  }
-
-  const dados = entrada.split('\n');
-  const registros = [];
-  const jaAdicionados = new Set();
-
-  dados.forEach((linha, index) => {
-    const colunas = linha.trim().split(/\t+/);
-    if (colunas.length < 7) {
-      console.warn(`Linha ${index + 1} ignorada: colunas insuficientes.`);
-      return;
+    const entrada = document.getElementById('entrada').value.trim();
+    if (!entrada) {
+        alert("Por favor, cole os dados da tabela antes de continuar.");
+        return;
     }
 
-    const data = colunas[0].trim();
-    const rastreio = colunas[3].trim();
-    let unidadeBruta = colunas[4]
-      .replace('APTO', '')
-      .replace(/SALA/gi, '')
-      .replace(' - ', '')
-      .trim()
-      .toUpperCase();
+    const linhas = entrada.split('\n');
+    const registros = [];
 
-    const remetente = colunas[5].trim();
-    const morador = colunas[6].trim();
+    linhas.forEach(linha => {
+        // Divide por tabulação, que é o separador ao copiar de uma tabela
+        const colunas = linha.trim().split(/\t+/);
+        
+        // Espera-se que os dados copiados tenham a estrutura da tabela
+        // ID, Destinatário, Remetente, Cód. Rastreio, Tipo, Data, Status, Ações
+        if (colunas.length >= 7) {
+            const id = colunas[0];
+            const destinatario = colunas[1];
+            const remetente = colunas[2];
+            const codRastreio = colunas[3];
+            const tipo = colunas[4];
+            const dataCadastro = colunas[5];
+            const status = colunas[6];
+            
+            // Lógica para filtrar pela torre (baseado no nome do destinatário)
+            const textoBusca = destinatario.toUpperCase();
+            const corresponde = (isAdministracao && textoBusca.includes('ADM')) || 
+                                (!isAdministracao && textoBusca.includes(torreSelecionada));
 
-    let unidade = unidadeBruta;
-    let torre = '';
-
-    if (unidadeBruta.includes(' - ')) {
-      const partes = unidadeBruta.split(' - ');
-      unidade = partes[0].trim();
-      torre = partes[1].trim();
-    } else {
-      torre = unidadeBruta; // ADMINISTRACAO
-    }
-
-    const corresponde =
-      (isAdministracao && torre === 'ADMINISTRACAO') ||
-      (!isAdministracao && torre === torreSelecionada);
-
-    if (corresponde) {
-      const chave = `${data}|${unidade}|${morador}|${rastreio}`;
-      if (!jaAdicionados.has(chave)) {
-        jaAdicionados.add(chave);
-        const numeroApto = isAdministracao ? 0 : parseInt(unidade) || 0;
-        const unidadeFinal = isAdministracao ? 'ADM' : unidade;
-        registros.push({ data, unidade: unidadeFinal, morador, rastreio, remetente, numeroApto });
-      }
-    }
-  });
-
-  if (registros.length === 0) {
-    alert("Nenhum registro encontrado para a torre selecionada.");
-    return;
-  }
-
-  registros.sort((a, b) => a.numeroApto - b.numeroApto);
-  const isTorreAB = torreSelecionada === 'TORRE A' || torreSelecionada === 'TORRE B';
-
-  const tabelaHTML = `
-    <html>
-    <head>
-      <title>Folha de Assinaturas - ${isAdministracao ? 'ADMINISTRAÇÃO' : torreSelecionada}</title>
-      <style>
-        body { font-family: "Segoe UI", sans-serif; padding: 20px; }
-        table { border-collapse: collapse; width: 100%; margin-top: 20px; table-layout: fixed; }
-        th, td {
-          border: 1px solid #000;
-          padding: 8px;
-          text-align: center;
-          vertical-align: top;
-          overflow-wrap: break-word;
+            if (corresponde) {
+                registros.push({
+                    data: dataCadastro,
+                    destinatario: destinatario,
+                    remetente: remetente,
+                    rastreio: codRastreio,
+                });
+            }
         }
-        th:nth-child(1), td:nth-child(1) { width: 11%; }
-        th:nth-child(2), td:nth-child(2) { width: 17%; }
-        th:nth-child(3), td:nth-child(3) { width: 7%; font-weight: bold; }
-        th:nth-child(4), td:nth-child(4) { width: 15%; }
-        th:nth-child(5), td:nth-child(5) { width: 20%; font-weight: bold; }
-        th:nth-child(6), td:nth-child(6) { width: 30%; text-align: left; }
-        @media print {
-          .no-print { display: none; }
-          tbody { break-inside: avoid; page-break-inside: avoid; }
-        }
-      </style>
-    </head>
-    <body>
-      <h1>Folha de Assinaturas - ${isAdministracao ? 'ADMINISTRAÇÃO' : torreSelecionada}</h1>
-      <table>
-        <thead>
-          <tr>
-            <th>Data</th>
-            <th>Código</th>
-            <th>Unid</th>
-            <th>Remetente</th>
-            <th>Destinatário</th>
-            <th>Retirada</th>
-          </tr>
-        </thead>
-        ${registros.map(reg => `
-          <tbody>
+    });
+
+    if (registros.length === 0) {
+        alert("Nenhum registro encontrado para a torre selecionada nos dados colados.");
+        return;
+    }
+
+    const tabelaHTML = `
+      <html>
+      <head>
+        <title>Folha de Assinaturas - ${torreSelecionada}</title>
+        <style>
+          body { font-family: "Segoe UI", sans-serif; padding: 20px; }
+          table { border-collapse: collapse; width: 100%; margin-top: 20px; }
+          th, td { border: 1px solid #000; padding: 8px; text-align: center; vertical-align: top; font-size: 0.9rem; word-break: break-word; }
+          .assinatura { height: 60px; text-align: left; }
+          @media print { .no-print { display: none; } }
+        </style>
+      </head>
+      <body>
+        <h1>Folha de Assinaturas - ${torreSelecionada}</h1>
+        <table>
+          <thead>
             <tr>
-              <td>${reg.data}</td>
-              <td>${reg.rastreio}</td>
-              <td>${reg.unidade}</td>
-              <td>${reg.remetente}</td>
-              <td>${reg.morador}</td>
-              <td>
-                <div style="display: flex; gap: 10px;">
-                  <span style="flex: 2;">Nome:</span>
-                  ${!isTorreAB && !isAdministracao ? '<span style="flex: 1;">Data:</span>' : ''}
-                </div>
-                <div style="display: flex; gap: 10px;">
-                  <span style="flex: 2;">Doc:</span>
-                  ${!isTorreAB && !isAdministracao ? '<span style="flex: 1;">Hora:</span>' : ''}
-                </div>
-              </td>
+              <th style="width:10%">Data</th>
+              <th style="width:15%">Remetente</th>
+              <th style="width:25%">Destinatário</th>
+              <th style="width:50%">Assinatura do Recebedor (Nome, Documento, Data)</th>
             </tr>
+          </thead>
+          <tbody>
+          ${registros.map(reg => `
+              <tr>
+                <td>${reg.data}</td>
+                <td>${reg.remetente}</td>
+                <td>${reg.destinatario}</td>
+                <td class="assinatura"></td>
+              </tr>
+          `).join('')}
           </tbody>
-        `).join('')}
-      </table>
-      <br>
-      <button class="no-print" onclick="window.print()">Imprimir</button>
-    </body>
-    </html>
-  `;
+        </table>
+        <br>
+        <button class="no-print" onclick="window.print()">Imprimir</button>
+      </body>
+      </html>`;
 
-  const novaJanela = window.open('', '_blank');
-  if (!novaJanela || novaJanela.closed || typeof novaJanela.closed === 'undefined') {
-    const fallback = document.getElementById("fallbackArea");
-    if (fallback) {
-      fallback.style.display = "block";
-      fallback.innerHTML = tabelaHTML;
+    const novaJanela = window.open('', '_blank');
+    if (novaJanela) {
+        novaJanela.document.write(tabelaHTML);
+        novaJanela.document.close();
+    } else {
+        alert("Não foi possível abrir a nova janela. Verifique se o seu navegador está bloqueando pop-ups.");
     }
-    alert("Não foi possível abrir a nova janela. A tabela foi gerada dentro da própria página.");
-  } else {
-    novaJanela.document.open();
-    novaJanela.document.write(tabelaHTML);
-    novaJanela.document.close();
-  }
 }
 
-// bind do botão
 document.addEventListener("DOMContentLoaded", () => {
-  const btn = document.getElementById("btn-gerar-folha");
-  if (btn) {
-    btn.addEventListener("click", gerarTabela);
-  }
+    const btn = document.getElementById("btn-gerar-folha");
+    if (btn) {
+        btn.addEventListener("click", gerarTabela);
+    }
 });

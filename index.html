@@ -9,271 +9,105 @@
 </head>
 <body>
     <header class="header">
+        <button class="btn-toggle-sidebar" id="btn-toggle-sidebar">
+            <span class="material-symbols-outlined">menu</span>
+        </button>
         <h1>
             <span class="material-symbols-outlined">inventory_2</span>
             Sistema de Encomendas
         </h1>
         <div class="user-info">
             <span>Bem-vindo!</span>
-            <div class="user-avatar">
-                <span class="material-symbols-outlined">person</span>
-            </div>
+            <div class="user-avatar"><span class="material-symbols-outlined">person</span></div>
         </div>
     </header>
 
     <div class="container">
         <nav class="sidebar">
             <ul class="sidebar-menu">
-                <li><a href="#" class="menu-item active" data-page="home">
-                    <span class="material-symbols-outlined">dashboard</span>
-                    <span>Página Inicial</span>
-                </a></li>
-                <li><a href="#" class="menu-item" data-page="encomendas">
-                    <span class="material-symbols-outlined">inventory_2</span>
-                    <span>Encomendas</span>
-                </a></li>
-                <li><a href="#" class="menu-item" data-page="folhas">
-                    <span class="material-symbols-outlined">assignment</span>
-                    <span>Folhas de Assinatura</span>
-                </a></li>
+                <li><a href="#" class="menu-item active" data-page="home"><span class="material-symbols-outlined">dashboard</span><span>Página Inicial</span></a></li>
+                <li><a href="#" class="menu-item" data-page="encomendas"><span class="material-symbols-outlined">inventory_2</span><span>Encomendas</span></a></li>
+                <li><a href="#" class="menu-item" data-page="folhas"><span class="material-symbols-outlined">assignment</span><span>Folhas de Assinatura</span></a></li>
             </ul>
         </nav>
 
         <main class="main-content">
             <div id="home" class="page active">
                 <h2 class="page-title">Dashboard</h2>
-                
                 <div class="stats-grid">
-                    <div class="stat-card">
-                        <h3 id="total-encomendas">0</h3>
-                        <p>Total de Encomendas</p>
-                    </div>
-                    <div class="stat-card">
-                        <h3 id="pendentes">0</h3>
-                        <p>Pendentes</p>
-                    </div>
-                    <div class="stat-card">
-                        <h3 id="entregues">0</h3>
-                        <p>Entregues</p>
-                    </div>
+                    <div class="stat-card"><h3 id="total-encomendas">0</h3><p>Total de Encomendas</p></div>
+                    <div class="stat-card"><h3 id="pendentes">0</h3><p>Pendentes</p></div>
+                    <div class="stat-card"><h3 id="entregues">0</h3><p>Entregues</p></div>
                 </div>
-
                 <div class="form-section">
                     <h3>Resumo do Sistema</h3>
                     <p>Bem-vindo ao Sistema de Controle de Encomendas. Aqui você pode:</p>
                     <ul style="margin: 1rem 0; padding-left: 2rem;">
-                        <li>Cadastrar novas encomendas</li>
-                        <li>Consultar encomendas existentes</li>
+                        <li>Cadastrar e editar encomendas</li>
+                        <li>Consultar encomendas com busca, ordenação e paginação</li>
                         <li>Dar baixa em encomendas entregues</li>
-                        <li>Gerenciar folhas de assinatura</li>
+                        <li>Exportar a lista para PDF e gerar folhas de assinatura</li>
                     </ul>
                 </div>
             </div>
 
             <div id="encomendas" class="page">
-                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 2rem;">
-                    <h2 class="page-title" style="margin-bottom: 0;">Controle de Encomendas</h2>
-                    <button class="btn-add-icon" id="btn-add-encomenda">
-                        <span class="material-symbols-outlined">add</span>
-                    </button>
+                <div class="page-header">
+                    <h2 class="page-title">Controle de Encomendas</h2>
+                    <div class="header-actions">
+                        <button class="btn" id="btn-export-pdf" title="Exportar para PDF"><span class="material-symbols-outlined">picture_as_pdf</span>Exportar</button>
+                        <button class="btn-add-icon" id="btn-add-encomenda" title="Adicionar Nova Encomenda"><span class="material-symbols-outlined">add</span></button>
+                    </div>
                 </div>
-
-                <div class="search-container">
-                    <span class="material-symbols-outlined search-icon">search</span>
-                    <input type="text" id="search-input" class="search-input" placeholder="Buscar por destinatário, remetente ou código...">
-                </div>
-
+                <div class="search-container"><span class="material-symbols-outlined search-icon">search</span><input type="text" id="search-input" class="search-input" placeholder="Buscar por destinatário, remetente ou código..."></div>
                 <div class="table-container">
                     <table class="table">
                         <thead>
                             <tr>
-                                <th>ID</th>
-                                <th>Destinatário</th>
-                                <th>Remetente</th>
-                                <th>Tipo</th>
-                                <th>Data Cadastro</th>
-                                <th>Status</th>
+                                <th class="sortable" data-sort="id">ID</th>
+                                <th class="sortable" data-sort="destinatario">Destinatário</th>
+                                <th class="sortable" data-sort="remetente">Remetente</th>
+                                <th class="sortable" data-sort="codigo">Cód. Rastreio</th>
+                                <th class="sortable" data-sort="tipo">Tipo</th>
+                                <th class="sortable" data-sort="dataCadastro">Data Cadastro</th>
+                                <th class="sortable" data-sort="status">Status</th>
                                 <th>Ações</th>
                             </tr>
                         </thead>
-                        <tbody id="encomendas-table">
-                            </tbody>
+                        <tbody id="encomendas-table"></tbody>
                     </table>
                 </div>
+                <div id="pagination-controls" class="pagination-container"></div>
             </div>
 
             <div id="folhas" class="page">
                 <h2 class="page-title">Folha de Assinaturas</h2>
-
                 <div class="form-section">
                     <div class="form-group">
                         <label for="entrada">Cole os dados do sistema</label>
-                        <textarea id="entrada" rows="6" placeholder="Cole aqui os dados copiados do sistema"></textarea>
+                        <textarea id="entrada" class="form-group" rows="6" placeholder="Cole aqui os dados copiados da tabela de encomendas"></textarea>
                     </div>
-
                     <div class="form-group">
                         <label for="torre">Selecione a Torre</label>
-                        <select id="torre">
-                            <option value="ADMINISTRACAO" selected>Administração</option>
-                            <option value="TORRE A">Torre A</option>
-                            <option value="TORRE B">Torre B</option>
-                            <option value="TORRE C">Torre C</option>
-                            <option value="TORRE D">Torre D</option>
-                            <option value="TORRE E">Torre E</option>
-                        </select>
+                        <select id="torre"><option value="ADMINISTRACAO" selected>Administração</option><option value="TORRE A">Torre A</option><option value="TORRE B">Torre B</option><option value="TORRE C">Torre C</option><option value="TORRE D">Torre D</option><option value="TORRE E">Torre E</option></select>
                     </div>
-
-                    <button class="btn btn-primary" id="btn-gerar-folha">
-                        <span class="material-symbols-outlined">description</span>
-                        Gerar Folha
-                    </button>
+                    <button class="btn btn-primary" id="btn-gerar-folha"><span class="material-symbols-outlined">description</span>Gerar Folha</button>
                 </div>
-
                 <div id="fallbackArea" class="form-section" style="display: none;"></div>
             </div>
         </main>
     </div>
 
-    <div id="modal-cadastro" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>Nova Encomenda</h3>
-                <button class="close-modal" id="close-modal">
-                    <span class="material-symbols-outlined">close</span>
-                </button>
-            </div>
-            
-            <form id="form-encomenda">
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label for="destinatario">Destinatário</label>
-                        <input type="text" id="destinatario" name="destinatario" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="remetente">Remetente</label>
-                        <input type="text" id="remetente" name="remetente" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="endereco">Endereço</label>
-                        <input type="text" id="endereco" name="endereco">
-                    </div>
-                    <div class="form-group">
-                        <label for="tipo">Tipo de Encomenda</label>
-                        <select id="tipo" name="tipo" required>
-                            <option value="">Selecione...</option>
-                            <option value="caixa">Caixa</option>
-                            <option value="carta">Carta</option>
-                            <option value="pacote">Pacote</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="codigo">Código de Rastreamento</label>
-                        <input type="text" id="codigo" name="codigo">
-                    </div>
-                    <div class="form-group">
-                        <label for="observacoes">Observações</label>
-                        <textarea id="observacoes" name="observacoes" rows="2"></textarea>
-                    </div>
-                </div>
-                <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 1rem;">
-                    <button type="button" class="btn" id="cancel-form" style="background: #6c757d; color: white;">
-                        <span class="material-symbols-outlined">cancel</span>
-                        Cancelar
-                    </button>
-                    <button type="submit" class="btn btn-primary">
-                        <span class="material-symbols-outlined">save</span>
-                        Cadastrar
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
+    <div id="modal-cadastro" class="modal"><div class="modal-content"><div class="modal-header"><h3>Nova Encomenda</h3><button class="close-modal" data-modal-id="modal-cadastro"><span class="material-symbols-outlined">close</span></button></div><form id="form-encomenda"><div class="form-grid"><div class="form-group"><label for="destinatario">Destinatário</label><input type="text" id="destinatario" name="destinatario" required></div><div class="form-group"><label for="remetente">Remetente</label><input type="text" id="remetente" name="remetente" required></div><div class="form-group"><label for="tipo">Tipo</label><select id="tipo" name="tipo" required><option value="">Selecione...</option><option value="caixa">Caixa</option><option value="carta">Carta</option><option value="pacote">Pacote</option></select></div><div class="form-group"><label for="codigo">Cód. Rastreamento</label><input type="text" id="codigo" name="codigo"></div><div class="form-group full-width"><label for="observacoes">Observações</label><textarea id="observacoes" name="observacoes" rows="2"></textarea></div></div><div class="modal-actions"><button type="button" class="btn btn-cancel" data-modal-id="modal-cadastro">Cancelar</button><button type="submit" class="btn btn-primary">Cadastrar</button></div></form></div></div>
+    <div id="modal-editar" class="modal"><div class="modal-content"><div class="modal-header"><h3>Editar Encomenda</h3><button class="close-modal" data-modal-id="modal-editar"><span class="material-symbols-outlined">close</span></button></div><form id="form-editar"><input type="hidden" id="edit-id" name="id"><div class="form-grid"><div class="form-group"><label for="edit-destinatario">Destinatário</label><input type="text" id="edit-destinatario" name="destinatario" required></div><div class="form-group"><label for="edit-remetente">Remetente</label><input type="text" id="edit-remetente" name="remetente" required></div><div class="form-group"><label for="edit-tipo">Tipo</label><select id="edit-tipo" name="tipo" required><option value="">Selecione...</option><option value="caixa">Caixa</option><option value="carta">Carta</option><option value="pacote">Pacote</option></select></div><div class="form-group"><label for="edit-codigo">Cód. Rastreamento</label><input type="text" id="edit-codigo" name="codigo"></div><div class="form-group full-width"><label for="edit-observacoes">Observações</label><textarea id="edit-observacoes" name="observacoes" rows="2"></textarea></div></div><div class="modal-actions"><button type="button" class="btn btn-cancel" data-modal-id="modal-editar">Cancelar</button><button type="submit" class="btn btn-primary">Salvar</button></div></form></div></div>
+    <div id="modal-info" class="modal"><div class="modal-content modal-small"><div class="modal-header"><h3>Informações da Entrega</h3><button class="close-modal" data-modal-id="modal-info"><span class="material-symbols-outlined">close</span></button></div><div class="info-content" id="info-details"></div><div class="modal-actions"><button type="button" class="btn btn-cancel" data-modal-id="modal-info">Fechar</button></div></div></div>
+    <div id="modal-confirm" class="modal"><div class="modal-content modal-small"><div class="modal-header"><h3>Confirmar Exclusão</h3><button class="close-modal" data-modal-id="modal-confirm"><span class="material-symbols-outlined">close</span></button></div><div class="confirm-content"><div class="confirm-message"><span class="material-symbols-outlined">warning</span><div>Tem certeza? Esta ação não pode ser desfeita.</div></div><div class="modal-actions"><button type="button" class="btn btn-cancel" data-modal-id="modal-confirm">Cancelar</button><button type="button" class="btn btn-danger" id="confirm-delete">Excluir</button></div></div></div></div>
+    <div id="modal-baixa" class="modal"><div class="modal-content modal-small"><div class="modal-header"><h3>Dar Baixa na Encomenda</h3><button class="close-modal" data-modal-id="modal-baixa"><span class="material-symbols-outlined">close</span></button></div><form id="form-baixa"><div class="form-group"><label for="nome-recebedor">Nome do Recebedor</label><input type="text" id="nome-recebedor" name="nome-recebedor" required></div><div class="form-group"><label for="documento-recebedor">Documento (CPF/RG)</label><input type="text" id="documento-recebedor" name="documento-recebedor" required></div><div class="modal-actions"><button type="button" class="btn btn-cancel" data-modal-id="modal-baixa">Cancelar</button><button type="submit" class="btn btn-success">Confirmar Baixa</button></div></form></div></div>
 
-    <div id="modal-info" class="modal">
-        <div class="modal-content modal-info">
-            <div class="modal-header">
-                <h3>Informações da Entrega</h3>
-                <button class="close-modal" id="close-modal-info">
-                    <span class="material-symbols-outlined">close</span>
-                </button>
-            </div>
-            
-            <div class="info-content" id="info-details">
-                </div>
-            
-            <div style="display: flex; justify-content: center; margin-top: 1rem;">
-                <button type="button" class="btn btn-primary" id="close-info">
-                    <span class="material-symbols-outlined">close</span>
-                    Fechar
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <div id="modal-confirm" class="modal">
-        <div class="modal-content modal-confirm">
-            <div class="modal-header">
-                <h3>Confirmar Exclusão</h3>
-                <button class="close-modal" id="close-modal-confirm">
-                    <span class="material-symbols-outlined">close</span>
-                </button>
-            </div>
-            
-            <div class="confirm-content">
-                <div class="confirm-message">
-                    <span class="material-symbols-outlined" style="color: #dc3545; font-size: 2rem;">warning</span>
-                    <div>
-                        Tem certeza que deseja excluir esta encomenda?<br>
-                        <strong>Esta ação não pode ser desfeita.</strong>
-                    </div>
-                </div>
-                
-                <div class="confirm-buttons">
-                    <button type="button" class="btn" id="cancel-delete" style="background: #6c757d; color: white;">
-                        <span class="material-symbols-outlined">cancel</span>
-                        Cancelar
-                    </button>
-                    <button type="button" class="btn btn-danger" id="confirm-delete">
-                        <span class="material-symbols-outlined">delete</span>
-                        Excluir
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div id="modal-baixa" class="modal">
-        <div class="modal-content" style="max-width: 500px;">
-            <div class="modal-header">
-                <h3>Dar Baixa na Encomenda</h3>
-                <button class="close-modal" id="close-modal-baixa">
-                    <span class="material-symbols-outlined">close</span>
-                </button>
-            </div>
-            
-            <form id="form-baixa">
-                <input type="hidden" id="baixa-encomenda-id">
-                <div class="form-group">
-                    <label for="nome-recebedor">Nome do Recebedor</label>
-                    <input type="text" id="nome-recebedor" name="nome-recebedor" required style="text-transform: uppercase;">
-                </div>
-                <div class="form-group">
-                    <label for="documento-recebedor">Documento (CPF/RG)</label>
-                    <input type="text" id="documento-recebedor" name="documento-recebedor" required style="text-transform: uppercase;">
-                </div>
-                <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 1rem;">
-                    <button type="button" class="btn" id="cancel-baixa" style="background: #6c757d; color: white;">
-                        <span class="material-symbols-outlined">cancel</span>
-                        Cancelar
-                    </button>
-                    <button type="submit" class="btn btn-success">
-                        <span class="material-symbols-outlined">check_circle</span>
-                        Confirmar Baixa
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
+    <div id="toast-container"></div>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
 
     <script src="app.js"></script>
     <script src="folhas.js"></script>
