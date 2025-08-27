@@ -8,6 +8,27 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+    <div id="login-container">
+        <div class="login-box">
+            <h2>
+                <span class="material-symbols-outlined">inventory_2</span>
+                Sistema de Encomendas
+            </h2>
+            <form id="form-login">
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="senha">Senha</label>
+                    <input type="password" id="senha" required>
+                </div>
+                <button type="submit" class="btn btn-primary full-width">Entrar</button>
+                <p id="login-error-message" class="error-message"></p>
+            </form>
+        </div>
+    </div>
+
     <header class="header">
         <button class="btn-toggle-sidebar" id="btn-toggle-sidebar">
             <span class="material-symbols-outlined">menu</span>
@@ -17,12 +38,13 @@
             Sistema de Encomendas
         </h1>
         <div class="user-info">
-            <span>Bem-vindo!</span>
+            <span id="user-email"></span>
+            <button id="btn-logout" class="btn btn-danger hidden">Sair</button>
             <div class="user-avatar"><span class="material-symbols-outlined">person</span></div>
         </div>
     </header>
 
-    <div class="container">
+    <div class="container logged-out">
         <nav class="sidebar">
             <ul class="sidebar-menu">
                 <li><a href="#" class="menu-item active" data-page="home"><span class="material-symbols-outlined">dashboard</span><span>Página Inicial</span></a></li>
@@ -39,15 +61,9 @@
                     <div class="stat-card"><h3 id="pendentes">0</h3><p>Pendentes</p></div>
                     <div class="stat-card"><h3 id="entregues">0</h3><p>Entregues</p></div>
                 </div>
-                <div class="form-section">
+                 <div class="form-section">
                     <h3>Resumo do Sistema</h3>
-                    <p>Bem-vindo ao Sistema de Controle de Encomendas. Aqui você pode:</p>
-                    <ul style="margin: 1rem 0; padding-left: 2rem;">
-                        <li>Cadastrar e editar encomendas</li>
-                        <li>Consultar encomendas com busca, ordenação e paginação</li>
-                        <li>Dar baixa em encomendas entregues</li>
-                        <li>Exportar a lista para PDF e gerar folhas de assinatura</li>
-                    </ul>
+                    <p>Bem-vindo ao Sistema de Controle de Encomendas.</p>
                 </div>
             </div>
 
@@ -110,13 +126,11 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
 
     <script type="module">
-        // Importações modulares do Firebase v9+
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
         import { getFirestore } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
-        import { EncomendaManager } from './app.js'; // Importa a sua classe
+        import { getAuth } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
+        import { EncomendaManager } from './app.js';
 
-        // Sua configuração do Firebase 
-        // IMPORTANTE: Substitua pelos seus dados reais se forem diferentes
         const firebaseConfig = {
             apiKey: "AIzaSyCfZVOU8G15_vJrS-rGrRRKLoOYzP6vQL0",
             authDomain: "sistema-de-encomendas.firebaseapp.com",
@@ -126,13 +140,11 @@
             appId: "1:583785844860:web:6b3cbcd4c2bb928358f9f9"
         };
 
-        // Inicializa o Firebase e o Firestore
         const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app); // Obtém a instância do banco de dados
+        const db = getFirestore(app);
+        const auth = getAuth(app);
 
-        // Inicia a aplicação, passando o 'db' para o construtor
-        // Adiciona à 'window' para que os 'onclick' no HTML funcionem
-        window.app = new EncomendaManager(db);
+        window.app = new EncomendaManager(db, auth);
     </script>
 
     <script src="folhas.js"></script>

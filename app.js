@@ -1,13 +1,20 @@
-// Importa as funções necessárias do Firestore v9+
+// Importações do Firebase Auth
+import { 
+    signInWithEmailAndPassword, 
+    onAuthStateChanged, 
+    signOut 
+} from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
+
+// Importações do Firestore
 import { 
     getDocs, collection, addDoc, doc, 
     updateDoc, deleteDoc 
 } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
 
-// Exporta a classe para que possa ser importada no index.html
 export class EncomendaManager {
-    constructor(db) { // Recebe a instância do Firestore
-        this.db = db; // Armazena a instância para usar nos métodos
+    constructor(db, auth) {
+        this.db = db;
+        this.auth = auth;
         this.encomendas = [];
         this.currentActionId = null;
         this.sortColumn = 'id';
@@ -17,11 +24,62 @@ export class EncomendaManager {
         this.init();
     }
 
-    async init() {
+    init() {
         this.bindEvents();
-        await this.loadEncomendas();
-        this.renderAll();
+        this.initAuth(); // Chama a lógica de autenticação
         this.initNavigation();
+    }
+
+    initAuth() {
+        const loginContainer = document.getElementById('login-container');
+        const mainContainer = document.querySelector('.container');
+        const btnLogout = document.getElementById('btn-logout');
+        const userEmailSpan = document.getElementById('user-email');
+
+        onAuthStateChanged(this.auth, async (user) => {
+            if (user) {
+                // Usuário está logado
+                loginContainer.style.display = 'none';
+                mainContainer.classList.remove('logged-out');
+                btnLogout.classList.remove('hidden');
+                userEmailSpan.textContent = user.email;
+
+                // Carrega os dados somente após o login
+                await this.loadEncomendas();
+                this.renderAll();
+            } else {
+                // Usuário está deslogado
+                loginContainer.style.display = 'flex';
+                mainContainer.classList.add('logged-out');
+                btnLogout.classList.add('hidden');
+                userEmailSpan.textContent = '';
+                
+                // Limpa a tabela para não mostrar dados antigos
+                this.encomendas = [];
+                this.renderEncomendas();
+                this.updateStats();
+            }
+        });
+
+        // Event listener para o formulário de login
+        document.getElementById('form-login').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const email = document.getElementById('email').value;
+            const senha = document.getElementById('senha').value;
+            const errorMessage = document.getElementById('login-error-message');
+            errorMessage.textContent = '';
+
+            signInWithEmailAndPassword(this.auth, email, senha)
+                .catch((error) => {
+                    console.error("Erro de login:", error.code);
+                    errorMessage.textContent = 'Email ou senha inválidos.';
+                });
+        });
+
+        // Event listener para o botão de logout
+        btnLogout.addEventListener('click', () => {
+            signOut(this.auth);
+        });
     }
 
     renderAll() {
@@ -68,8 +126,6 @@ export class EncomendaManager {
         });
     }
 
-    // --- MÉTODOS ATUALIZADOS PARA O FIREBASE v9+ ---
-
     async loadEncomendas() {
         try {
             const encomendasCollection = collection(this.db, 'encomendas');
@@ -77,7 +133,7 @@ export class EncomendaManager {
             this.encomendas = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         } catch (error) {
             console.error("Erro ao carregar encomendas:", error);
-            this.showToast('Falha ao carregar dados do servidor.', 'error');
+            this.showToast('Falha ao carregar dados do servidor. Verifique as regras de segurança.', 'error');
         }
     }
 
@@ -177,8 +233,6 @@ export class EncomendaManager {
         }
     }
     
-    // --- MÉTODOS DE LÓGICA DA INTERFACE (NÃO PRECISAM DE ALTERAÇÃO) ---
-    
     abrirModalEdicao(id) {
         const encomenda = this.encomendas.find(e => e.id === id);
         if (encomenda) {
@@ -235,15 +289,9 @@ export class EncomendaManager {
     renderEncomendas(searchTerm = '') {
         const searchLower = searchTerm.toLowerCase();
         const filtered = this.encomendas.filter(e => {
-            // Verifica se o destinatário existe ANTES de usar o toLowerCase()
             const destinatarioMatch = e.destinatario && e.destinatario.toLowerCase().includes(searchLower);
-            
-            // Verifica se o remetente existe ANTES de usar o toLowerCase()
             const remetenteMatch = e.remetente && e.remetente.toLowerCase().includes(searchLower);
-    
-            // A verificação do código já era segura, mas mantemos o padrão
             const codigoMatch = e.codigo && e.codigo.toLowerCase().includes(searchLower);
-    
             return destinatarioMatch || remetenteMatch || codigoMatch;
         });
         
