@@ -82,9 +82,9 @@ Crie um novo Aplicativo da Web e copie o objeto de configuração firebaseConfig
 
 3. Adicione suas credenciais:
 
-Abra o arquivo index.html
+Abra o arquivo main.js na raiz do projeto.
 
-No final do arquivo, dentro da tag <script type="module">, cole o seu objeto firebaseConfig
+No topo do arquivo, você encontrará um bloco de exemplo const firebaseConfig. Substitua-o pelo objeto de configuração que você copiou do console do Firebase.
 
 4. Defina as Regras de Segurança:
 
