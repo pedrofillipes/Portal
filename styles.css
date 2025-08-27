@@ -116,73 +116,34 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background:
 .pagination-container button:hover:not(:disabled) { background: #667eea; color: white; border-color: #667eea; }
 .pagination-container button:disabled { cursor: not-allowed; opacity: 0.5; }
 
-/* Responsive */
+#btn-gerar-folha { margin-top: 20px; }
+
+/* --- ESTILOS DE AUTENTICAÇÃO --- */
+.container.logged-out { display: none; }
+#login-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #f4f7fc; display: flex; align-items: center; justify-content: center; z-index: 3000; }
+.login-box { background: white; padding: 2.5rem; border-radius: 16px; box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1); width: 100%; max-width: 400px; text-align: center; }
+.login-box h2 { display: flex; align-items: center; justify-content: center; gap: 0.5rem; margin-bottom: 2rem; }
+.login-box .form-group { text-align: left; margin-bottom: 1.5rem; }
+.btn.full-width { width: 100%; }
+.error-message { color: #f56565; margin-top: 1rem; height: 1rem; font-size: 0.9rem; }
+.hidden { display: none !important; }
+
+/* --- MELHORIAS DE RESPONSIVIDADE MOBILE --- */
+.table-container {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
 @media (max-width: 768px) {
     .header { padding: 0 1rem; }
     .main-content { padding: 90px 1rem 1rem; }
     .form-grid { grid-template-columns: 1fr; }
-    .page-header { flex-direction: column; align-items: stretch; }
-}
-
-#btn-gerar-folha {
-    margin-top: 20px;
-}
-
-/* --- ESTILOS DE AUTENTICAÇÃO --- */
-
-/* Esconde o app principal quando deslogado */
-.container.logged-out {
-    display: none;
-}
-
-/* Overlay da tela de login */
-#login-container {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: #f4f7fc;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 3000;
-}
-
-.login-box {
-    background: white;
-    padding: 2.5rem;
-    border-radius: 16px;
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
-    width: 100%;
-    max-width: 400px;
-    text-align: center;
-}
-
-.login-box h2 {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    margin-bottom: 2rem;
-}
-
-.login-box .form-group {
-    text-align: left;
-    margin-bottom: 1.5rem;
-}
-
-.btn.full-width {
-    width: 100%;
-}
-
-.error-message {
-    color: #f56565;
-    margin-top: 1rem;
-    height: 1rem;
-    font-size: 0.9rem;
-}
-
-.hidden {
-    display: none !important;
+    .page-header { flex-direction: column; align-items: flex-start; }
+    .header h1 { font-size: 1.2rem; }
+    .user-info { gap: 0.5rem; }
+    .header-actions { width: 100%; justify-content: flex-end; }
+    .search-container { width: 100%; margin-top: 1rem; }
+    .search-input { max-width: none; }
+    .table th, .table td { padding: 0.8rem; font-size: 0.75rem; white-space: nowrap; }
+    .modal-content { width: 90%; padding: 1rem 1.5rem; }
 }
