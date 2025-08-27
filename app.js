@@ -17,56 +17,6 @@ export class EncomendaManager {
         this.init();
     }
 
-    async migrarDadosDoLocalStorage() {
-        console.log("🔍 Iniciando tentativa de migração do Local Storage...");
-
-        // 1. Pega os dados antigos do Local Storage
-        const dadosAntigosJSON = localStorage.getItem('encomendas');
-
-        if (!dadosAntigosJSON) {
-            console.warn("Nenhum dado encontrado no Local Storage com a chave 'encomendas'.");
-            alert("Nenhum dado antigo para migrar foi encontrado.");
-            return;
-        }
-
-        try {
-            const encomendasAntigas = JSON.parse(dadosAntigosJSON);
-
-            if (!encomendasAntigas || encomendasAntigas.length === 0) {
-                console.warn("Os dados encontrados no Local Storage estão vazios.");
-                alert("Os dados antigos encontrados estão vazios. Nenhuma migração necessária.");
-                return;
-            }
-
-            console.log(`📦 Encontradas ${encomendasAntigas.length} encomendas antigas para migrar.`);
-
-            // 2. Prepara para enviar ao Firestore
-            const encomendasCollection = collection(this.db, 'encomendas');
-            let sucessoCount = 0;
-
-            // 3. Itera sobre cada encomenda antiga e salva no Firebase
-            for (const encomenda of encomendasAntigas) {
-                // Remove o ID antigo, pois o Firebase criará um novo e único
-                const { id, ...dadosParaSalvar } = encomenda;
-
-                await addDoc(encomendasCollection, dadosParaSalvar);
-                console.log(`✅ Encomenda para "${dadosParaSalvar.destinatario}" migrada com sucesso!`);
-                sucessoCount++;
-            }
-
-            console.log("🎉 Migração concluída!");
-            alert(`${sucessoCount} encomendas foram migradas com sucesso para o Firebase! Por favor, recarregue a página.`);
-
-        } catch (error) {
-            console.error("❌ Erro durante a migração:", error);
-            alert("Ocorreu um erro durante a migração. Verifique o console para mais detalhes.");
-        }
-    }
-
-    async init() {
-        // ...resto da classe sem alterações...
-    }
-
     async init() {
         this.bindEvents();
         await this.loadEncomendas();
