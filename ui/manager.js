@@ -13,6 +13,8 @@ export class UIManager {
         this.currentPage = 1;
         this.rowsPerPage = 10;
         this.searchTerm = '';
+        this.statusFilter = 'todos';
+        this.dateFilter = '';
 
         this.cacheDOM();
         this.bindAuthEvents();
@@ -29,6 +31,11 @@ export class UIManager {
         this.searchInput = document.getElementById('search-input');
         this.avatarButton = document.getElementById('avatar-button');
         this.userDropdown = document.getElementById('user-dropdown');
+        this.statusFilterEl = document.getElementById('status-filter');
+        this.dateFilterEl = document.getElementById('date-filter');
+        this.clearDateBtn = document.getElementById('clear-date-filter');
+        this.toggleFiltersBtn = document.getElementById('btn-toggle-filters');
+        this.filterContainer = document.querySelector('.filter-container');
     }
 
     bindAuthEvents() {
@@ -140,12 +147,59 @@ export class UIManager {
         this.avatarButton.addEventListener('click', (e) => {
             e.stopPropagation();
             this.userDropdown.classList.toggle('active');
+            this.filterContainer.classList.remove('active');
+        });
+
+        this.toggleFiltersBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            this.filterContainer.classList.toggle('active');
+            this.userDropdown.classList.remove('active');
+        });
+        
+        this.filterContainer.addEventListener('click', (e) => e.stopPropagation());
+
+        this.tableBody.addEventListener('click', e => {
+            const kebabButton = e.target.closest('.btn-kebab');
+            
+            document.querySelectorAll('.actions-dropdown.active').forEach(dropdown => {
+                if (!kebabButton || dropdown.dataset.dropdownId !== kebabButton.dataset.id) {
+                    dropdown.classList.remove('active');
+                }
+            });
+
+            if (kebabButton) {
+                e.stopPropagation();
+                const id = kebabButton.dataset.id;
+                const dropdown = document.querySelector(`.actions-dropdown[data-dropdown-id="${id}"]`);
+                if (dropdown) {
+                    dropdown.classList.toggle('active');
+                }
+            }
         });
 
         window.addEventListener('click', () => {
-            if (this.userDropdown.classList.contains('active')) {
-                this.userDropdown.classList.remove('active');
-            }
+            document.querySelectorAll('.dropdown-menu.active, .filter-container.active, .actions-dropdown.active').forEach(d => {
+                d.classList.remove('active');
+            });
+        });
+
+        this.statusFilterEl.addEventListener('change', (e) => {
+            this.currentPage = 1;
+            this.statusFilter = e.target.value;
+            this.renderAll();
+        });
+
+        this.dateFilterEl.addEventListener('change', (e) => {
+            this.currentPage = 1;
+            this.dateFilter = e.target.value;
+            this.renderAll();
+        });
+
+        this.clearDateBtn.addEventListener('click', () => {
+            this.currentPage = 1;
+            this.dateFilter = '';
+            this.dateFilterEl.value = '';
+            this.renderAll();
         });
     }
 
@@ -205,11 +259,25 @@ export class UIManager {
 
     renderEncomendas() {
         const searchLower = this.searchTerm.toLowerCase();
-        const filtered = this.encomendas.filter(e => 
+        let filtered = this.encomendas.filter(e => 
             (e.destinatario && e.destinatario.toLowerCase().includes(searchLower)) ||
             (e.remetente && e.remetente.toLowerCase().includes(searchLower)) ||
             (e.codigo && e.codigo.toLowerCase().includes(searchLower))
         );
+
+        if (this.statusFilter !== 'todos') {
+            filtered = filtered.filter(e => e.status === this.statusFilter);
+        }
+
+        if (this.dateFilter) {
+            filtered = filtered.filter(e => {
+                if (!e.dataCadastro) return false;
+                const [dia, mes, ano] = e.dataCadastro.split('/');
+                const dataFormatada = `${ano}-${mes}-${dia}`;
+                return dataFormatada === this.dateFilter;
+            });
+        }
+        
         const paginated = filtered.slice((this.currentPage - 1) * this.rowsPerPage, this.currentPage * this.rowsPerPage);
         
         this.tableBody.innerHTML = paginated.map(encomenda => `
@@ -222,13 +290,21 @@ export class UIManager {
                 <td>${encomenda.dataCadastro || 'N/A'}</td>
                 <td><span class="status-badge status-${encomenda.status}">${encomenda.status}</span></td>
                 <td class="actions">
-                    ${encomenda.status === 'pendente' ? `
-                        <button class="btn btn-success" onclick="ui.darBaixa('${encomenda.id}')" title="Dar Baixa"><span class="material-symbols-outlined">task_alt</span></button>
-                        <button class="btn" style="background:#ffc107; color:white;" onclick="ui.abrirModalEdicao('${encomenda.id}')" title="Editar"><span class="material-symbols-outlined">edit</span></button>
-                    ` : `<button class="btn" style="background:#17a2b8; color:white;" onclick="ui.mostrarInfoEntrega('${encomenda.id}')" title="Ver Info"><span class="material-symbols-outlined">info</span></button>`}
-                    <button class="btn btn-danger" onclick="ui.confirmarExclusao('${encomenda.id}')" title="Excluir"><span class="material-symbols-outlined">delete</span></button>
+                    <button class="btn-kebab" data-id="${encomenda.id}">
+                        <span class="material-symbols-outlined">more_vert</span>
+                    </button>
+                    <div class="actions-dropdown" data-dropdown-id="${encomenda.id}" onclick="event.stopPropagation()">
+                        ${encomenda.status === 'pendente' ? `
+                            <button class="btn" onclick="ui.darBaixa('${encomenda.id}')"><span class="material-symbols-outlined">task_alt</span>Dar Baixa</button>
+                            <button class="btn" onclick="ui.abrirModalEdicao('${encomenda.id}')"><span class="material-symbols-outlined">edit</span>Editar</button>
+                        ` : `
+                            <button class="btn" onclick="ui.mostrarInfoEntrega('${encomenda.id}')"><span class="material-symbols-outlined">info</span>Ver Info</button>
+                        `}
+                        <button class="btn danger" onclick="ui.confirmarExclusao('${encomenda.id}')"><span class="material-symbols-outlined">delete</span>Excluir</button>
+                    </div>
                 </td>
             </tr>`).join('');
+            
         this.renderPaginationControls(filtered.length);
     }
     
@@ -245,9 +321,13 @@ export class UIManager {
     }
 
     updateStats() {
-        document.getElementById('total-encomendas').textContent = this.encomendas.length;
-        document.getElementById('pendentes').textContent = this.encomendas.filter(e => e.status === 'pendente').length;
-        document.getElementById('entregues').textContent = this.encomendas.filter(e => e.status === 'entregue').length;
+        const total = this.encomendas.length;
+        const pendentes = this.encomendas.filter(e => e.status === 'pendente').length;
+        const entregues = total - pendentes;
+
+        document.getElementById('total-encomendas').textContent = total;
+        document.getElementById('pendentes').textContent = pendentes;
+        document.getElementById('entregues').textContent = entregues;
     }
 
     abrirModalEdicao(id) {
