@@ -27,6 +27,8 @@ export class UIManager {
         this.userEmailSpan = document.getElementById('user-email');
         this.tableBody = document.getElementById('encomendas-table');
         this.searchInput = document.getElementById('search-input');
+        this.avatarButton = document.getElementById('avatar-button');
+        this.userDropdown = document.getElementById('user-dropdown');
     }
 
     bindAuthEvents() {
@@ -107,13 +109,18 @@ export class UIManager {
             } catch (error) { this.showToast('Erro ao excluir encomenda.', 'error'); }
         });
 
+        document.getElementById('confirm-pdf').addEventListener('click', () => {
+            this.exportarParaPDF();
+            this.closeModal('modal-confirm-pdf');
+        });
+
         this.searchInput.addEventListener('input', e => {
             this.currentPage = 1;
             this.searchTerm = e.target.value;
             this.renderAll();
         });
 
-        document.getElementById('btn-export-pdf').addEventListener('click', () => this.exportarParaPDF());
+        document.getElementById('btn-export-pdf').addEventListener('click', () => this.openModal('modal-confirm-pdf'));
         document.getElementById('btn-add-encomenda').addEventListener('click', () => this.openModal('modal-cadastro'));
         document.getElementById('btn-toggle-sidebar').addEventListener('click', () => this.mainContainer.classList.toggle('sidebar-collapsed'));
 
@@ -129,6 +136,17 @@ export class UIManager {
         document.querySelectorAll('.close-modal, .btn-cancel').forEach(btn => btn.addEventListener('click', () => this.closeModal(btn.dataset.modalId)));
         document.querySelectorAll('.modal').forEach(modal => modal.addEventListener('click', e => { if (e.target === modal) this.closeModal(modal.id); }));
         document.addEventListener('keydown', e => { if (e.key === 'Escape') document.querySelectorAll('.modal.active').forEach(m => this.closeModal(m.id)); });
+
+        this.avatarButton.addEventListener('click', (e) => {
+            e.stopPropagation();
+            this.userDropdown.classList.toggle('active');
+        });
+
+        window.addEventListener('click', () => {
+            if (this.userDropdown.classList.contains('active')) {
+                this.userDropdown.classList.remove('active');
+            }
+        });
     }
 
     mostrarLoginUI() {
