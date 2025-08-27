@@ -109,7 +109,32 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
 
-    <script src="app.js"></script>
+    <script type="module">
+        // Importações modulares do Firebase v9+
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
+        import { getFirestore } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
+        import { EncomendaManager } from './app.js'; // Importa a sua classe
+
+        // Sua configuração do Firebase 
+        // IMPORTANTE: Substitua pelos seus dados reais se forem diferentes
+        const firebaseConfig = {
+            apiKey: "AIzaSyCfZVOU8G15_vJrS-rGrRRKLoOYzP6vQL0",
+            authDomain: "sistema-de-encomendas.firebaseapp.com",
+            projectId: "sistema-de-encomendas",
+            storageBucket: "sistema-de-encomendas.firebasestorage.app",
+            messagingSenderId: "583785844860",
+            appId: "1:583785844860:web:6b3cbcd4c2bb928358f9f9"
+        };
+
+        // Inicializa o Firebase e o Firestore
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app); // Obtém a instância do banco de dados
+
+        // Inicia a aplicação, passando o 'db' para o construtor
+        // Adiciona à 'window' para que os 'onclick' no HTML funcionem
+        window.app = new EncomendaManager(db);
+    </script>
+
     <script src="folhas.js"></script>
 </body>
 </html>

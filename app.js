@@ -1,7 +1,15 @@
-class EncomendaManager {
-    constructor() {
-        this.encomendas = this.loadEncomendas();
-        this.currentId = this.getNextId();
+// Importa as funções necessárias do Firestore v9+
+import { 
+    getDocs, collection, addDoc, doc, 
+    updateDoc, deleteDoc 
+} from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
+
+// Exporta a classe para que possa ser importada no index.html
+export class EncomendaManager {
+    constructor(db) { // Recebe a instância do Firestore
+        this.db = db; // Armazena a instância para usar nos métodos
+        this.encomendas = [];
+        this.currentActionId = null;
         this.sortColumn = 'id';
         this.sortDirection = 'desc';
         this.currentPage = 1;
@@ -9,8 +17,59 @@ class EncomendaManager {
         this.init();
     }
 
-    init() {
+    async migrarDadosDoLocalStorage() {
+        console.log("🔍 Iniciando tentativa de migração do Local Storage...");
+
+        // 1. Pega os dados antigos do Local Storage
+        const dadosAntigosJSON = localStorage.getItem('encomendas');
+
+        if (!dadosAntigosJSON) {
+            console.warn("Nenhum dado encontrado no Local Storage com a chave 'encomendas'.");
+            alert("Nenhum dado antigo para migrar foi encontrado.");
+            return;
+        }
+
+        try {
+            const encomendasAntigas = JSON.parse(dadosAntigosJSON);
+
+            if (!encomendasAntigas || encomendasAntigas.length === 0) {
+                console.warn("Os dados encontrados no Local Storage estão vazios.");
+                alert("Os dados antigos encontrados estão vazios. Nenhuma migração necessária.");
+                return;
+            }
+
+            console.log(`📦 Encontradas ${encomendasAntigas.length} encomendas antigas para migrar.`);
+
+            // 2. Prepara para enviar ao Firestore
+            const encomendasCollection = collection(this.db, 'encomendas');
+            let sucessoCount = 0;
+
+            // 3. Itera sobre cada encomenda antiga e salva no Firebase
+            for (const encomenda of encomendasAntigas) {
+                // Remove o ID antigo, pois o Firebase criará um novo e único
+                const { id, ...dadosParaSalvar } = encomenda;
+
+                await addDoc(encomendasCollection, dadosParaSalvar);
+                console.log(`✅ Encomenda para "${dadosParaSalvar.destinatario}" migrada com sucesso!`);
+                sucessoCount++;
+            }
+
+            console.log("🎉 Migração concluída!");
+            alert(`${sucessoCount} encomendas foram migradas com sucesso para o Firebase! Por favor, recarregue a página.`);
+
+        } catch (error) {
+            console.error("❌ Erro durante a migração:", error);
+            alert("Ocorreu um erro durante a migração. Verifique o console para mais detalhes.");
+        }
+    }
+
+    async init() {
+        // ...resto da classe sem alterações...
+    }
+
+    async init() {
         this.bindEvents();
+        await this.loadEncomendas();
         this.renderAll();
         this.initNavigation();
     }
@@ -59,25 +118,117 @@ class EncomendaManager {
         });
     }
 
-    cadastrarEncomenda() {
+    // --- MÉTODOS ATUALIZADOS PARA O FIREBASE v9+ ---
+
+    async loadEncomendas() {
+        try {
+            const encomendasCollection = collection(this.db, 'encomendas');
+            const snapshot = await getDocs(encomendasCollection);
+            this.encomendas = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        } catch (error) {
+            console.error("Erro ao carregar encomendas:", error);
+            this.showToast('Falha ao carregar dados do servidor.', 'error');
+        }
+    }
+
+    async cadastrarEncomenda() {
         const form = document.getElementById('form-encomenda');
-        const encomenda = {
-            id: this.currentId++,
-            destinatario: form.destinatario.value,
-            remetente: form.remetente.value,
+        const novaEncomenda = {
+            destinatario: form.destinatario.value.toUpperCase(),
+            remetente: form.remetente.value.toUpperCase(),
             tipo: form.tipo.value,
-            codigo: form.codigo.value || 'N/A',
+            codigo: form.codigo.value.toUpperCase() || 'N/A',
             observacoes: form.observacoes.value,
             dataCadastro: new Date().toLocaleDateString('pt-BR'),
             status: 'pendente'
         };
-        this.encomendas.push(encomenda);
-        this.saveEncomendas();
-        this.renderAll();
-        this.closeModal('modal-cadastro');
-        this.showToast('Encomenda cadastrada com sucesso!');
+
+        try {
+            const encomendasCollection = collection(this.db, 'encomendas');
+            const docRef = await addDoc(encomendasCollection, novaEncomenda);
+            this.encomendas.push({ id: docRef.id, ...novaEncomenda });
+            this.renderAll();
+            this.closeModal('modal-cadastro');
+            this.showToast('Encomenda cadastrada com sucesso!');
+        } catch (error) {
+            console.error("Erro ao cadastrar:", error);
+            this.showToast('Erro ao cadastrar encomenda.', 'error');
+        }
     }
 
+    async salvarEdicao() {
+        const form = document.getElementById('form-editar');
+        const id = form.querySelector('#edit-id').value;
+        const index = this.encomendas.findIndex(e => e.id === id);
+
+        if (index > -1) {
+            const dadosAtualizados = {
+                destinatario: form.querySelector('#edit-destinatario').value.toUpperCase(),
+                remetente: form.querySelector('#edit-remetente').value.toUpperCase(),
+                tipo: form.querySelector('#edit-tipo').value,
+                codigo: form.querySelector('#edit-codigo').value.toUpperCase() || 'N/A',
+                observacoes: form.querySelector('#edit-observacoes').value
+            };
+
+            try {
+                const docRef = doc(this.db, 'encomendas', id);
+                await updateDoc(docRef, dadosAtualizados);
+                this.encomendas[index] = { ...this.encomendas[index], ...dadosAtualizados };
+                this.renderAll();
+                this.closeModal('modal-editar');
+                this.showToast('Encomenda atualizada com sucesso!');
+            } catch (error) {
+                console.error("Erro ao salvar edição:", error);
+                this.showToast('Erro ao atualizar encomenda.', 'error');
+            }
+        }
+    }
+
+    async confirmarBaixa() {
+        const id = this.currentActionId;
+        const index = this.encomendas.findIndex(e => e.id === id);
+        if (index > -1) {
+            const agora = new Date();
+            const dadosBaixa = {
+                status: 'entregue',
+                dataEntrega: agora.toLocaleDateString('pt-BR'),
+                horaEntrega: agora.toLocaleTimeString('pt-BR'),
+                nomeRecebedor: document.getElementById('nome-recebedor').value.toUpperCase(),
+                documentoRecebedor: document.getElementById('documento-recebedor').value.toUpperCase()
+            };
+            
+            try {
+                const docRef = doc(this.db, 'encomendas', id);
+                await updateDoc(docRef, dadosBaixa);
+                this.encomendas[index] = { ...this.encomendas[index], ...dadosBaixa };
+                this.renderAll();
+                this.closeModal('modal-baixa');
+                this.showToast('Baixa realizada com sucesso!');
+            } catch (error) {
+                console.error("Erro ao dar baixa:", error);
+                this.showToast('Erro ao dar baixa na encomenda.', 'error');
+            }
+        }
+    }
+
+    async excluirEncomenda() {
+        const id = this.currentActionId;
+        try {
+            const docRef = doc(this.db, 'encomendas', id);
+            await deleteDoc(docRef);
+            this.encomendas = this.encomendas.filter(e => e.id !== id);
+            this.currentPage = 1;
+            this.renderAll();
+            this.closeModal('modal-confirm');
+            this.showToast('Encomenda excluída com sucesso!', 'error');
+        } catch (error) {
+            console.error("Erro ao excluir:", error);
+            this.showToast('Erro ao excluir encomenda.', 'error');
+        }
+    }
+    
+    // --- MÉTODOS DE LÓGICA DA INTERFACE (NÃO PRECISAM DE ALTERAÇÃO) ---
+    
     abrirModalEdicao(id) {
         const encomenda = this.encomendas.find(e => e.id === id);
         if (encomenda) {
@@ -92,56 +243,14 @@ class EncomendaManager {
         }
     }
 
-    salvarEdicao() {
-        const form = document.getElementById('form-editar');
-        const id = parseInt(form.querySelector('#edit-id').value);
-        const encomenda = this.encomendas.find(e => e.id === id);
-        if (encomenda) {
-            encomenda.destinatario = form.querySelector('#edit-destinatario').value;
-            encomenda.remetente = form.querySelector('#edit-remetente').value;
-            encomenda.tipo = form.querySelector('#edit-tipo').value;
-            encomenda.codigo = form.querySelector('#edit-codigo').value || 'N/A';
-            encomenda.observacoes = form.querySelector('#edit-observacoes').value;
-            this.saveEncomendas();
-            this.renderAll();
-            this.closeModal('modal-editar');
-            this.showToast('Encomenda atualizada com sucesso!');
-        }
-    }
-
     darBaixa(id) {
         this.currentActionId = id;
         this.openModal('modal-baixa');
     }
 
-    confirmarBaixa() {
-        const encomenda = this.encomendas.find(e => e.id === this.currentActionId);
-        if (encomenda) {
-            const agora = new Date();
-            encomenda.status = 'entregue';
-            encomenda.dataEntrega = agora.toLocaleDateString('pt-BR');
-            encomenda.horaEntrega = agora.toLocaleTimeString('pt-BR');
-            encomenda.nomeRecebedor = document.getElementById('nome-recebedor').value;
-            encomenda.documentoRecebedor = document.getElementById('documento-recebedor').value;
-            this.saveEncomendas();
-            this.renderAll();
-            this.closeModal('modal-baixa');
-            this.showToast('Baixa realizada com sucesso!');
-        }
-    }
-
     confirmarExclusao(id) {
         this.currentActionId = id;
         this.openModal('modal-confirm');
-    }
-
-    excluirEncomenda() {
-        this.encomendas = this.encomendas.filter(e => e.id !== this.currentActionId);
-        this.saveEncomendas();
-        this.currentPage = 1;
-        this.renderAll();
-        this.closeModal('modal-confirm');
-        this.showToast('Encomenda excluída com sucesso!', 'error');
     }
     
     mostrarInfoEntrega(id) {
@@ -159,7 +268,10 @@ class EncomendaManager {
     ordenarEncomendas() {
         this.encomendas.sort((a, b) => {
             let valA = a[this.sortColumn], valB = b[this.sortColumn];
-            if (typeof valA === 'string') { valA = valA.toLowerCase(); valB = valB.toLowerCase(); }
+            if (this.sortColumn !== 'id' && typeof valA === 'string') {
+                valA = valA.toLowerCase();
+                valB = valB.toLowerCase();
+            }
             if (valA < valB) return this.sortDirection === 'asc' ? -1 : 1;
             if (valA > valB) return this.sortDirection === 'asc' ? 1 : -1;
             return 0;
@@ -172,30 +284,39 @@ class EncomendaManager {
 
     renderEncomendas(searchTerm = '') {
         const searchLower = searchTerm.toLowerCase();
-        const filtered = this.encomendas.filter(e => 
-            e.destinatario.toLowerCase().includes(searchLower) ||
-            e.remetente.toLowerCase().includes(searchLower) ||
-            (e.codigo && e.codigo.toLowerCase().includes(searchLower))
-        );
+        const filtered = this.encomendas.filter(e => {
+            // Verifica se o destinatário existe ANTES de usar o toLowerCase()
+            const destinatarioMatch = e.destinatario && e.destinatario.toLowerCase().includes(searchLower);
+            
+            // Verifica se o remetente existe ANTES de usar o toLowerCase()
+            const remetenteMatch = e.remetente && e.remetente.toLowerCase().includes(searchLower);
+    
+            // A verificação do código já era segura, mas mantemos o padrão
+            const codigoMatch = e.codigo && e.codigo.toLowerCase().includes(searchLower);
+    
+            return destinatarioMatch || remetenteMatch || codigoMatch;
+        });
+        
         const paginated = filtered.slice((this.currentPage - 1) * this.rowsPerPage, this.currentPage * this.rowsPerPage);
         
         document.getElementById('encomendas-table').innerHTML = paginated.map(encomenda => `
             <tr>
-                <td>${encomenda.id}</td>
-                <td>${encomenda.destinatario}</td>
-                <td>${encomenda.remetente}</td>
-                <td>${encomenda.codigo}</td>
-                <td>${encomenda.tipo}</td>
-                <td>${encomenda.dataCadastro}</td>
+                <td>${encomenda.id.substring(0, 6)}...</td>
+                <td>${encomenda.destinatario || 'N/A'}</td>
+                <td>${encomenda.remetente || 'N/A'}</td>
+                <td>${encomenda.codigo || 'N/A'}</td>
+                <td>${encomenda.tipo || 'N/A'}</td>
+                <td>${encomenda.dataCadastro || 'N/A'}</td>
                 <td><span class="status-badge status-${encomenda.status}">${encomenda.status}</span></td>
                 <td class="actions">
                     ${encomenda.status === 'pendente' ? `
-                        <button class="btn btn-success" onclick="app.darBaixa(${encomenda.id})" title="Dar Baixa"><span class="material-symbols-outlined">task_alt</span></button>
-                        <button class="btn" style="background:#ffc107; color:white;" onclick="app.abrirModalEdicao(${encomenda.id})" title="Editar"><span class="material-symbols-outlined">edit</span></button>
-                    ` : `<button class="btn" style="background:#17a2b8; color:white;" onclick="app.mostrarInfoEntrega(${encomenda.id})" title="Ver Info"><span class="material-symbols-outlined">info</span></button>`}
-                    <button class="btn btn-danger" onclick="app.confirmarExclusao(${encomenda.id})" title="Excluir"><span class="material-symbols-outlined">delete</span></button>
+                        <button class="btn btn-success" onclick="app.darBaixa('${encomenda.id}')" title="Dar Baixa"><span class="material-symbols-outlined">task_alt</span></button>
+                        <button class="btn" style="background:#ffc107; color:white;" onclick="app.abrirModalEdicao('${encomenda.id}')" title="Editar"><span class="material-symbols-outlined">edit</span></button>
+                    ` : `<button class="btn" style="background:#17a2b8; color:white;" onclick="app.mostrarInfoEntrega('${encomenda.id}')" title="Ver Info"><span class="material-symbols-outlined">info</span></button>`}
+                    <button class="btn btn-danger" onclick="app.confirmarExclusao('${encomenda.id}')" title="Excluir"><span class="material-symbols-outlined">delete</span></button>
                 </td>
             </tr>`).join('');
+            
         this.renderPaginationControls(filtered.length);
     }
 
@@ -216,11 +337,6 @@ class EncomendaManager {
         document.getElementById('pendentes').textContent = this.encomendas.filter(e => e.status === 'pendente').length;
         document.getElementById('entregues').textContent = this.encomendas.filter(e => e.status === 'entregue').length;
     }
-
-    getEncomendas() { return this.encomendas; }
-    loadEncomendas() { return JSON.parse(localStorage.getItem('encomendas') || '[]'); }
-    saveEncomendas() { localStorage.setItem('encomendas', JSON.stringify(this.encomendas)); }
-    getNextId() { return this.encomendas.reduce((max, e) => Math.max(max, e.id), 0) + 1; }
 
     openModal(modalId) { document.getElementById(modalId)?.classList.add('active'); }
     closeModal(modalId) {
@@ -246,12 +362,10 @@ class EncomendaManager {
         doc.text("Relatório de Encomendas", 14, 16);
         doc.autoTable({
             head: [['ID', 'Destinatário', 'Remetente', 'Cód. Rastreio', 'Data', 'Status']],
-            body: this.encomendas.map(e => [e.id, e.destinatario, e.remetente, e.codigo, e.dataCadastro, e.status]),
+            body: this.encomendas.map(e => [e.id.substring(0, 10), e.destinatario, e.remetente, e.codigo, e.dataCadastro, e.status]),
             startY: 20, styles: { fontSize: 8 }, headStyles: { fillColor: [102, 126, 234] }
         });
         doc.save('relatorio-encomendas.pdf');
         this.showToast('Relatório PDF gerado com sucesso!');
     }
 }
-
-const app = new EncomendaManager();
