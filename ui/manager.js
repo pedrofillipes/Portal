@@ -280,30 +280,34 @@ export class UIManager {
         
         const paginated = filtered.slice((this.currentPage - 1) * this.rowsPerPage, this.currentPage * this.rowsPerPage);
         
-        this.tableBody.innerHTML = paginated.map(encomenda => `
-            <tr>
-                <td>${encomenda.id.substring(0, 6)}...</td>
-                <td>${encomenda.destinatario || 'N/A'}</td>
-                <td>${encomenda.remetente || 'N/A'}</td>
-                <td>${encomenda.codigo || 'N/A'}</td>
-                <td>${encomenda.tipo || 'N/A'}</td>
-                <td>${encomenda.dataCadastro || 'N/A'}</td>
-                <td><span class="status-badge status-${encomenda.status}">${encomenda.status}</span></td>
-                <td class="actions">
-                    <button class="btn-kebab" data-id="${encomenda.id}">
-                        <span class="material-symbols-outlined">more_vert</span>
-                    </button>
-                    <div class="actions-dropdown" data-dropdown-id="${encomenda.id}" onclick="event.stopPropagation()">
-                        ${encomenda.status === 'pendente' ? `
-                            <button class="btn" onclick="ui.darBaixa('${encomenda.id}')"><span class="material-symbols-outlined">task_alt</span>Dar Baixa</button>
-                            <button class="btn" onclick="ui.abrirModalEdicao('${encomenda.id}')"><span class="material-symbols-outlined">edit</span>Editar</button>
-                        ` : `
-                            <button class="btn" onclick="ui.mostrarInfoEntrega('${encomenda.id}')"><span class="material-symbols-outlined">info</span>Ver Info</button>
-                        `}
-                        <button class="btn danger" onclick="ui.confirmarExclusao('${encomenda.id}')"><span class="material-symbols-outlined">delete</span>Excluir</button>
-                    </div>
-                </td>
-            </tr>`).join('');
+        this.tableBody.innerHTML = paginated.map((encomenda, index) => {
+            const numeroLinha = (this.currentPage - 1) * this.rowsPerPage + index + 1;
+            return `
+                <tr>
+                    <td>${numeroLinha}</td>
+                    <td>${encomenda.destinatario || 'N/A'}</td>
+                    <td>${encomenda.remetente || 'N/A'}</td>
+                    <td>${encomenda.codigo || 'N/A'}</td>
+                    <td>${encomenda.tipo || 'N/A'}</td>
+                    <td>${encomenda.dataCadastro || 'N/A'}</td>
+                    <td><span class="status-badge status-${encomenda.status}">${encomenda.status}</span></td>
+                    <td class="actions">
+                        <button class="btn-kebab" data-id="${encomenda.id}">
+                            <span class="material-symbols-outlined">more_vert</span>
+                        </button>
+                        <div class="actions-dropdown" data-dropdown-id="${encomenda.id}" onclick="event.stopPropagation()">
+                            ${encomenda.status === 'pendente' ? `
+                                <button class="btn" onclick="ui.darBaixa('${encomenda.id}')"><span class="material-symbols-outlined">task_alt</span>Dar Baixa</button>
+                                <button class="btn" onclick="ui.abrirModalEdicao('${encomenda.id}')"><span class="material-symbols-outlined">edit</span>Editar</button>
+                            ` : `
+                                <button class="btn" onclick="ui.mostrarInfoEntrega('${encomenda.id}')"><span class="material-symbols-outlined">info</span>Ver Info</button>
+                            `}
+                            <button class="btn danger" onclick="ui.confirmarExclusao('${encomenda.id}')"><span class="material-symbols-outlined">delete</span>Excluir</button>
+                        </div>
+                    </td>
+                </tr>
+            `;
+        }).join('');
             
         this.renderPaginationControls(filtered.length);
     }
