@@ -123,4 +123,5 @@ Vá para as configurações do repositório e acesse a seção Pages
 
 Selecione a branch main como fonte de deploy e salve
 
-IMPORTANTE: Após a publicação, copie a URL do seu site (ex: https://seu-usuario.github.io) e adicione-a à lista de Domínios autorizados nas configurações do Firebase Authentication.
+IMPORTANTE: Após a publicação, copie a URL do seu site (ex: https://seu-usuario.github.io) e adicione-a
+ à lista de Domínios autorizados nas configurações do Firebase Authentication.
