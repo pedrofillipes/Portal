@@ -117,18 +117,8 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background:
 .hidden { display: none !important; }
 
 /* --- MELHORIAS DE UI/UX E RESPONSIVIDADE --- */
-
-/* CORREÇÃO DEFINITIVA: Centraliza o ícone na barra lateral minimizada */
-.container.sidebar-collapsed .sidebar-menu a {
-    display: flex;
-    justify-content: center;
-    padding: 1rem 0;
-    gap: 0;
-}
-.container.sidebar-collapsed .sidebar-menu .material-symbols-outlined {
-    margin: 0;
-}
-
+.container.sidebar-collapsed .sidebar-menu a { display: grid; place-items: center; padding: 1rem 0; gap: 0; }
+.container.sidebar-collapsed .sidebar-menu .material-symbols-outlined { margin: 0; }
 .user-info { position: relative; }
 .user-avatar { cursor: pointer; }
 .dropdown-menu { position: absolute; top: calc(100% + 15px); right: 0; background: white; border-radius: 8px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1); width: 250px; z-index: 1100; padding: 0.5rem; opacity: 0; visibility: hidden; transform: translateY(-10px); transition: opacity 0.2s ease, transform 0.2s ease; }
@@ -156,7 +146,6 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background:
 .mobile-actions { display: none; }
 .btn-kebab { background: transparent; border: none; cursor: pointer; border-radius: 50%; width: 36px; height: 36px; display: inline-flex; align-items: center; justify-content: center; color: #4a5568; }
 .btn-kebab:hover { background-color: #f1f5f9; }
-.btn-kebab .material-symbols-outlined { font-size: 24px; }
 .actions-dropdown { position: absolute; top: 0; right: 45px; background: white; border-radius: 8px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1); width: 200px; z-index: 100; padding: 0.5rem; display: flex; flex-direction: column; gap: 0.25rem; opacity: 0; visibility: hidden; transform: scale(0.95); transition: opacity 0.2s ease, transform 0.2s ease; }
 .actions-dropdown.active { opacity: 1; visibility: visible; transform: scale(1); }
 .actions-dropdown button { width: 100%; justify-content: flex-start; background: transparent; color: #2d3748; font-weight: 500; }
@@ -164,7 +153,14 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background:
 .actions-dropdown button.danger { color: #f56565; }
 .actions-dropdown button.danger:hover { background-color: #fef2f2; }
 .actions-dropdown .material-symbols-outlined { font-size: 18px; }
-.desktop-actions .btn { width: 38px; height: 38px; padding: 0.5rem; border-radius: 50%; }
+
+/* NOVA REGRA PARA DIMINUIR OS BOTÕES DE AÇÃO NO DESKTOP */
+.desktop-actions .btn {
+    width: 38px;
+    height: 38px;
+    padding: 0.5rem;
+    border-radius: 50%;
+}
 
 @media (max-width: 768px) {
     .header { padding: 0 1rem; }
