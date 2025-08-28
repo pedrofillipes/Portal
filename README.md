@@ -84,7 +84,8 @@ Crie um novo Aplicativo da Web e copie o objeto de configuração firebaseConfig
 
 Abra o arquivo main.js na raiz do projeto.
 
-No topo do arquivo, você encontrará um bloco de exemplo const firebaseConfig. Substitua-o pelo objeto de configuração que você copiou do console do Firebase.
+No topo do arquivo, você encontrará um bloco de exemplo const firebaseConfig. Substitua-o pelo objeto de configuração que
+você copiou do console do Firebase.
 
 4. Defina as Regras de Segurança:
 
