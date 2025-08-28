@@ -99,7 +99,7 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background:
 .table th.sortable.desc::after { content: ' \2193'; opacity: 1; color: #2d3748; }
 
 /* Pagination */
-.pagination-container { display: flex; justify-content: flex-end; align-items: center; padding-top: 1.5rem; gap: 1rem; }
+.pagination-container { display: flex; justify-content: center; align-items: center; padding-top: 1.5rem; gap: 1rem; }
 .pagination-container button { background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 0.5rem 1rem; cursor: pointer; transition: all 0.3s ease; }
 .pagination-container button:hover:not(:disabled) { background: #667eea; color: white; border-color: #667eea; }
 .pagination-container button:disabled { cursor: not-allowed; opacity: 0.5; }
@@ -184,3 +184,4 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background:
     .modal-header h3 { font-size: 1.2rem; }
     #btn-add-encomenda { bottom: 1.5rem; right: 1.5rem; }
 }
+
