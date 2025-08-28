@@ -282,6 +282,24 @@ export class UIManager {
         
         this.tableBody.innerHTML = paginated.map((encomenda, index) => {
             const numeroLinha = (this.currentPage - 1) * this.rowsPerPage + index + 1;
+            const statusPendente = encomenda.status === 'pendente';
+            
+            const desktopActions = statusPendente ? `
+                <button class="btn btn-success" onclick="ui.darBaixa('${encomenda.id}')" title="Dar Baixa"><span class="material-symbols-outlined">task_alt</span></button>
+                <button class="btn" style="background:#ffc107; color:white;" onclick="ui.abrirModalEdicao('${encomenda.id}')" title="Editar"><span class="material-symbols-outlined">edit</span></button>
+                <button class="btn btn-danger" onclick="ui.confirmarExclusao('${encomenda.id}')" title="Excluir"><span class="material-symbols-outlined">delete</span></button>
+            ` : `
+                <button class="btn" style="background:#17a2b8; color:white;" onclick="ui.mostrarInfoEntrega('${encomenda.id}')" title="Ver Info"><span class="material-symbols-outlined">info</span></button>
+                <button class="btn btn-danger" onclick="ui.confirmarExclusao('${encomenda.id}')" title="Excluir"><span class="material-symbols-outlined">delete</span></button>
+            `;
+
+            const mobileActions = statusPendente ? `
+                <button class="btn" onclick="ui.darBaixa('${encomenda.id}')"><span class="material-symbols-outlined">task_alt</span>Dar Baixa</button>
+                <button class="btn" onclick="ui.abrirModalEdicao('${encomenda.id}')"><span class="material-symbols-outlined">edit</span>Editar</button>
+            ` : `
+                <button class="btn" onclick="ui.mostrarInfoEntrega('${encomenda.id}')"><span class="material-symbols-outlined">info</span>Ver Info</button>
+            `;
+
             return `
                 <tr>
                     <td>${numeroLinha}</td>
@@ -292,17 +310,17 @@ export class UIManager {
                     <td>${encomenda.dataCadastro || 'N/A'}</td>
                     <td><span class="status-badge status-${encomenda.status}">${encomenda.status}</span></td>
                     <td class="actions">
-                        <button class="btn-kebab" data-id="${encomenda.id}">
-                            <span class="material-symbols-outlined">more_vert</span>
-                        </button>
-                        <div class="actions-dropdown" data-dropdown-id="${encomenda.id}" onclick="event.stopPropagation()">
-                            ${encomenda.status === 'pendente' ? `
-                                <button class="btn" onclick="ui.darBaixa('${encomenda.id}')"><span class="material-symbols-outlined">task_alt</span>Dar Baixa</button>
-                                <button class="btn" onclick="ui.abrirModalEdicao('${encomenda.id}')"><span class="material-symbols-outlined">edit</span>Editar</button>
-                            ` : `
-                                <button class="btn" onclick="ui.mostrarInfoEntrega('${encomenda.id}')"><span class="material-symbols-outlined">info</span>Ver Info</button>
-                            `}
-                            <button class="btn danger" onclick="ui.confirmarExclusao('${encomenda.id}')"><span class="material-symbols-outlined">delete</span>Excluir</button>
+                        <div class="desktop-actions">
+                            ${desktopActions}
+                        </div>
+                        <div class="mobile-actions">
+                            <button class="btn-kebab" data-id="${encomenda.id}">
+                                <span class="material-symbols-outlined">more_vert</span>
+                            </button>
+                            <div class="actions-dropdown" data-dropdown-id="${encomenda.id}" onclick="event.stopPropagation()">
+                                ${mobileActions}
+                                <button class="btn danger" onclick="ui.confirmarExclusao('${encomenda.id}')"><span class="material-symbols-outlined">delete</span>Excluir</button>
+                            </div>
                         </div>
                     </td>
                 </tr>
@@ -393,8 +411,8 @@ export class UIManager {
         const doc = new jsPDF();
         doc.text("Relatório de Encomendas", 14, 16);
         doc.autoTable({
-            head: [['ID', 'Destinatário', 'Remetente', 'Cód. Rastreio', 'Data', 'Status']],
-            body: this.encomendas.map(e => [e.id.substring(0, 10), e.destinatario, e.remetente, e.codigo, e.dataCadastro, e.status]),
+            head: [['#', 'Destinatário', 'Remetente', 'Cód. Rastreio', 'Data', 'Status']],
+            body: this.encomendas.map((e, i) => [i + 1, e.destinatario, e.remetente, e.codigo, e.dataCadastro, e.status]),
             startY: 20, styles: { fontSize: 8 }, headStyles: { fillColor: [102, 126, 234] }
         });
         doc.save('relatorio-encomendas.pdf');
