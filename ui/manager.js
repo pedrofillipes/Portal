@@ -242,15 +242,36 @@ export class UIManager {
         });
     }
 
-    ordenarEncomendas() {
+     ordenarEncomendas() {
+        // Helper function para converter data DD/MM/AAAA para um formato comparável (AAAAMMDD)
+        const converterDataParaComparacao = (dataStr) => {
+            if (!dataStr || typeof dataStr !== 'string' || !dataStr.includes('/')) {
+                return '0'; // Retorna um valor padrão para dados inválidos
+            }
+            const [dia, mes, ano] = dataStr.split('/');
+            return `${ano}${mes}${dia}`;
+        };
+
         this.encomendas.sort((a, b) => {
-            let valA = a[this.sortColumn], valB = b[this.sortColumn];
-            if (typeof valA === 'string') valA = valA.toLowerCase();
-            if (typeof valB === 'string') valB = valB.toLowerCase();
+            let valA, valB;
+
+            // Se a coluna for 'dataCadastro', usa a lógica de conversão de data
+            if (this.sortColumn === 'dataCadastro') {
+                valA = converterDataParaComparacao(a.dataCadastro);
+                valB = converterDataParaComparacao(b.dataCadastro);
+            } else {
+                // Mantém a lógica original para as outras colunas
+                valA = a[this.sortColumn];
+                valB = b[this.sortColumn];
+                if (typeof valA === 'string') valA = valA.toLowerCase();
+                if (typeof valB === 'string') valB = valB.toLowerCase();
+            }
+            
             if (valA < valB) return this.sortDirection === 'asc' ? -1 : 1;
             if (valA > valB) return this.sortDirection === 'asc' ? 1 : -1;
             return 0;
         });
+
         document.querySelectorAll('.table th.sortable').forEach(th => {
             th.classList.remove('asc', 'desc');
             if (th.dataset.sort === this.sortColumn) th.classList.add(this.sortDirection);
@@ -419,3 +440,4 @@ export class UIManager {
         this.showToast('Relatório PDF gerado com sucesso!');
     }
 }
+
