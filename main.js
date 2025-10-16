@@ -7,14 +7,7 @@ import { escutarEncomendas } from './services/firestore.js';
 import { UIManager } from './ui/manager.js';
 
 // --- COLE SUAS CREDENCIAIS DO FIREBASE AQUI ---
-const firebaseConfig = {
-  apiKey: "AIzaSyCfZVOU8G15_vJrS-rGrRRKLoOYzP6vQL0",
-  authDomain: "sistema-de-encomendas.firebaseapp.com",
-  projectId: "sistema-de-encomendas",
-  storageBucket: "sistema-de-encomendas.firebasestorage.app",
-  messagingSenderId: "583785844860",
-  appId: "1:583785844860:web:6b3cbcd4c2bb928358f9f9"
-};
+const firebaseConfig = {};
 
 // --- INICIALIZAÇÃO DA APLICAÇÃO ---
 
@@ -44,3 +37,4 @@ initAuth(
 
 // Disponibiliza o objeto da UI globalmente para os `onclick` do HTML
 window.ui = uiManager;
+
